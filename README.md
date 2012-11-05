@@ -1,0 +1,4 @@
+Firegoose
+=========
+
+Repository for firegoose
