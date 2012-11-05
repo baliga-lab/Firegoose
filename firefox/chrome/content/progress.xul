@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://firegoose/skin/overlay.css" type="text/css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://firegoose/locale/firegoose.dtd">
+
+<dialog id="firegooseProgress"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="Processing..."
+        buttons="accept"
+        buttonlabelaccept="Dismiss"
+        onload="onLoad();"
+        
+        flex="1">
+
+  <script type="application/x-javascript" src="chrome://firegoose/content/progress.js"/>
+
+  <groupbox orient="vertical" flex="1">
+  <label id="message" value="Please wait..."/>
+  <progressmeter id="progress" mode="determined" value="5" max="100"/>
+  <separator/>
+  </groupbox>
+
+  <separator/>
+</dialog>

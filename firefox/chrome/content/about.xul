@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://firegoose/skin/overlay.css" type="text/css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://firegoose/locale/firegoose.dtd">
+
+<dialog id="firegooseAbout"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="&firegoose.about.label;"
+        buttons="accept">
+
+  <hbox>
+    <image src="chrome://firegoose/skin/Gaggle.png"/>
+    <spacer flex="1"/>
+  </hbox>
+
+  <label value="Firegoose" class="firegoose_title"/>
+  <label value="version: &firegoose.version;"/>
+  <label value="built on: &firegoose.build.date;"/>
+
+  <groupbox orient="vertical">
+  <label value="by: Christopher Bare"/>
+  <label value="    &lt;cbare@systemsbiology.org&gt;"/>
+  <separator/>
+  <description>
+    Based the original Firegoose by Paul Shannon. Thanks to the SIMILE lab at MIT for the javaFirefoxExtension.
+  </description>
+  <separator/>
+  <description>
+    Created in the Nitin S. Baliga lab.
+  </description>
+  <separator/>
+  <description>
+    Copyright (C) 2007, 2008 by Institute for Systems Biology,
+    Seattle, Washington, USA.  All rights reserved.
+  </description>
+  <separator/>
+  <description>
+    The Firegoose is distributed under the GNU Lesser
+    General Public License, the text of which is available at:
+    http://www.gnu.org/copyleft/lesser.html
+  </description>
+  </groupbox>
+  
+  <separator/>
+  <vbox align="center" flex="1">
+    <image src="chrome://firegoose/skin/isb-logo2.jpg" width="207" hieght="113"/>
+    <spacer flex="1"/>
+  </vbox>
+  <separator/>
+</dialog>

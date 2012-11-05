@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+  
+    <em:id>firegoose@systemsbiology.org</em:id>
+
+    <!-- Needed because FF4 doesn't unpack the XPI by default. The java classloader looks
+         for jar files in the filesystem, so needs the XPI to be unpacked. -->
+    <em:unpack>true</em:unpack>
+
+    <em:name>FireGoose</em:name>
+    <em:version>1.0.466</em:version>
+    <em:type>2</em:type>
+    <em:description>Connect FireFox to the Gaggle</em:description>
+    <em:creator>J. Christopher Bare, Institute for Systems Biology</em:creator>
+    <em:contributor>Based on the original Firegoose by Paul Shannon</em:contributor>
+    <em:contributor>Thanks to the SIMILE lab at MIT for the javaFirefoxExtension</em:contributor>
+    <!-- optional items -->
+    <em:homepageURL>http://gaggle.systemsbiology.net/docs/geese/firegoose/</em:homepageURL>
+    <em:aboutURL>chrome://firegoose/content/about.xul</em:aboutURL>
+	<em:iconURL>chrome://firegoose/skin/Gaggle.png</em:iconURL>
+
+    <em:updateURL>https://gaggle.systemsbiology.net/firegoose/firegoose_update.rdf</em:updateURL>
+    
+    <!--
+    <em:optionsURL>chrome://firegoose/content/preferences.xul</em:optionsURL>
+    -->
+
+    <!-- Firefox -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>1.5</em:minVersion>
+        <em:maxVersion>*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+  </Description>
+
+</RDF>

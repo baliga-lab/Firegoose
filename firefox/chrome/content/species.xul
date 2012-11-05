@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://firegoose/skin/overlay.css" type="text/css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://firegoose/locale/firegoose.dtd">
+
+<dialog id="fgSpecies"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="&firegoose.setSpecies.label;"
+        buttons="accept,cancel"
+        ondialogaccept="FG_speciesDialogAccept();" >
+  <script type="application/x-javascript">
+  	var FG_speciesDialogParams = window.arguments[0];
+
+	window.addEventListener("load", function() { FG_speciesDialogInit(); }, false);
+
+  	function FG_speciesDialogInit() {
+        var speciesTextbox = document.getElementById("speciesTextbox");
+  	    speciesTextbox.value = FG_speciesDialogParams.species;
+
+        var modeRadioGroup = document.getElementById("mode");
+        if (FG_speciesDialogParams.mode) {
+			if (FG_speciesDialogParams.mode == "temp")
+				modeRadioGroup.selectedIndex = 0;
+			if (FG_speciesDialogParams.mode == "default")
+				modeRadioGroup.selectedIndex = 1;
+			if (FG_speciesDialogParams.mode == "force")
+				modeRadioGroup.selectedIndex = 2;
+		}
+  	}
+
+  	function FG_speciesDialogAccept() {
+        var speciesTextbox = document.getElementById("speciesTextbox");
+        FG_speciesDialogParams.outSpecies = speciesTextbox.value; 
+
+        var modeRadioGroup = document.getElementById("mode");
+        FG_speciesDialogParams.outMode = modeRadioGroup.selectedItem.value;
+
+        var remember = document.getElementById("remember");
+        FG_speciesDialogParams.outRemember = remember.checked;
+  	}
+  </script>
+  <vbox>
+    <label id="fg_speciesTitle" class="dialogTitle" value="&firegoose.setSpecies.label;" />
+    <label value="Set default species for data found in web pages or" />
+    <label value="data coming from the Gaggle." />
+    <separator/>
+    <hbox>
+      <label control="speciesTextbox" value="Species:" />
+      <textbox id="speciesTextbox" tooltiptext="Set species for gaggle data." />
+    </hbox>
+    <separator/>
+    <vbox>
+      <radiogroup id="mode">
+        <radio value="temp" selected="true" label="Just for current data"/>
+        <radio value="default" label="Default"/>
+        <radio value="force" label="Force"/>
+        <radio value="reset" label="Reset"/>
+      </radiogroup>
+      <label value="Checking 'Default' sets the default species to be used" />
+      <label value="whenever a blank or unknown species is encountered. " />
+      <label value="Force will force the species of all broadcasts to the" />
+      <label value="specified value. Use this if species is wrong." />
+      <label value="&quot;Just for current data&quot; makes a one-time change to any" />
+      <label value="broadcasts or page data currently stored in the Firegoose." />
+    </vbox>
+    <separator/>
+    <checkbox id="remember" label="Remember selection" checked="false"/>
+  </vbox>
+  <separator/>
+</dialog>

@@ -1,0 +1,17 @@
+/*
+ * Copyright (C) 2007 by Institute for Systems Biology,
+ * Seattle, Washington, USA.  All rights reserved.
+ */
+
+
+Firegoose is released under the GNU Lesser
+General Public License, the text of which is available at:
+http://www.gnu.org/copyleft/lesser.html
+
+
+The Firegoose makes use of a component called "Java Firefox Extension" from the
+Simile group at MIT. Their license is reproduced here in the file:
+
+java-firefox-extension-license.txt
+
+

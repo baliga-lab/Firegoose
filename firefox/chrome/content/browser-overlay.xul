@@ -1,0 +1,365 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://firegoose/skin/overlay.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://firegoose/locale/firegoose.dtd">
+
+<overlay id="fg_toolbar" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<stringbundleset id="stringbundleset"> 
+  <stringbundle id="strings_firegoose" src="chrome://firegoose/locale/firegoose.properties"/>
+</stringbundleset>
+
+<script type="application/x-javascript">
+	dump("\n\n\n---- Firegoose initializing -------------------------------------------\n\n");
+</script>
+
+<script type="application/x-javascript" src="javaFiregooseLoader.js"/>
+<script type="application/x-javascript" src="util.js"/>
+<script type="application/x-javascript" src="gaggleDataHolder.js"/>
+<script type="application/x-javascript" src="gaggleData.js"/>
+<script type="application/x-javascript" src="FGWorkflow.js"/>
+<script type="application/x-javascript" src="firegoose.js"/>
+
+<script type="application/x-javascript" src="ufmt.js"/>
+<script type="application/x-javascript" src="gaggleMicroformat.js"/>
+
+<script type="application/x-javascript" src="handlers/MRMAtlasGoose.js"/>
+<script type="application/x-javascript" src="handlers/david.js"/>
+<script type="application/x-javascript" src="handlers/egrin.js"/>
+<script type="application/x-javascript" src="handlers/egrin2.js"/>
+<script type="application/x-javascript" src="handlers/emblstring.js"/>
+<script type="application/x-javascript" src="handlers/entrez.js"/>
+<script type="application/x-javascript" src="handlers/gaggleMicroformatHandler.js"/>
+<script type="application/x-javascript" src="handlers/gaggleStore.js"/>
+<script type="application/x-javascript" src="handlers/gaggleXml.js"/>
+<script type="application/x-javascript" src="handlers/haloAnnotations.js"/>
+<script type="application/x-javascript" src="handlers/kegg.js"/>
+<script type="application/x-javascript" src="handlers/keggSearchResults.js"/>
+<script type="application/x-javascript" src="handlers/maggie.js"/>
+<script type="application/x-javascript" src="handlers/metlin.js"/>
+<script type="application/x-javascript" src="handlers/ontological_discovery_environment.js"/>
+<script type="application/x-javascript" src="handlers/pddb.js"/>
+<script type="application/x-javascript" src="handlers/peptideAtlas.js"/>
+<script type="application/x-javascript" src="handlers/pipe2Goose.js"/>
+<script type="application/x-javascript" src="handlers/pipeGoose.js"/>
+<script type="application/x-javascript" src="handlers/sgd.js"/>
+<script type="application/x-javascript" src="handlers/stamp.js"/>
+<script type="application/x-javascript" src="handlers/t1dbase.js"/>
+<script type="application/x-javascript" src="handlers/testR.js"/>
+<script type="application/x-javascript" src="handlers/virtual_plant.js"/>
+<script type="application/x-javascript" src="handlers/webDMV.js"/>
+
+
+<script type="application/x-javascript" src="boss.js"/>
+<script type="application/x-javascript" src="handlers/api.js"/>
+
+<script type="application/x-javascript">
+	// initializing and registering the handlers is now done in the handler js files.
+	
+	// test functioning of the interface between java and javascript
+	//javaFiregooseLoader.testToJavaArray();
+	//javaFiregooseLoader.test();
+
+    FG_initialize();
+</script>
+
+
+<commandset id="mainCommandSet">
+  <command id="fgcmd_hello" label="&firegoose.hello.label;" oncommand="FG_hello();" tooltiptext="Say hello."/>
+  <command id="fgcmd_test"  label="&firegoose.test.label;"  oncommand="FG_test();"/>
+  <command id="fgcmd_jvmInfo" label="&firegoose.jvm_info.label;" oncommand="FG_jvmInfo()" tooltiptext="Log JVM info to the javascript console"/>
+
+
+  <command id="fgcmd_about"
+           label="&firegoose.about.label;"
+           oncommand="FG_openAboutWindow();"
+           accesskey="&firegoose.about.accesskey;"
+           tooltiptext="About the Firegoose toolbar"
+           />
+
+  <command id="fgcmd_connect"
+           label="&firegoose.connect.label;"
+           oncommand="FG_connectToGaggle();"
+           accesskey="&firegoose.connect.accesskey;"
+           tooltiptext="&firegoose.connect.tooltip;"
+           />
+  <command id="fgcmd_disconnect"
+           label="&firegoose.disconnect.label;"
+           oncommand="FG_disconnectFromGaggle();"
+           accesskey="&firegoose.disconnect.accesskey;"
+           tooltiptext="&firegoose.disconnect.tooltip;"
+           disabled="true"
+           />
+  <command id="fgcmd_update"
+           label="&firegoose.update.label;"
+           oncommand="FG_populateTargetChooser();"
+           accesskey="&firegoose.update.accesskey;"
+           tooltiptext="&firegoose.update.tooltip;"
+           disabled="true"
+           />
+  <command id="fgcmd_help"
+           label="&firegoose.help.label;"
+           oncommand="FG_help();"
+           accesskey="&firegoose.help.accesskey;"
+           tooltiptext="&firegoose.help.tooltip;"
+           disabled="false"
+           />
+  <command id="fgcmd_enableWebsites"
+           label="&firegoose.enableWebsites.label;"
+           oncommand="FG_enableWebsites();"
+           accesskey="&firegoose.enableWebsites.accesskey;"
+           tooltiptext="&firegoose.enableWebsites.tooltip;"
+           disabled="false"
+           />
+  <command id="fgcmd_showGoose"
+           label="&firegoose.showGoose.label;"
+           oncommand="FG_requestShow();"
+           tooltiptext="&firegoose.showGoose.tooltip;"
+           disabled="true"
+           />
+  <command id="fgcmd_hideGoose"
+           label="&firegoose.hideGoose.label;"
+           oncommand="FG_requestHide();"
+           tooltiptext="&firegoose.hideGoose.tooltip;"
+           disabled="true"
+           />
+  <command id="fgcmd_broadcast"
+           label="&firegoose.broadcast.label;"
+           oncommand="FG_broadcast();"
+           tooltiptext="&firegoose.broadcast.tooltip;"
+           disabled="true"
+           />
+
+  <command id="fgcmd_executeNextWorkflow"
+           label="&firegoose.executeNextWorkflow.label;"
+           oncommand="FG_executeNextWorkflow();"
+           tooltiptext="&firegoose.executeNextWorkflow.tooltip;"
+           disabled="false"
+           />
+  
+  <!-- 
+  <command id="fgcmd_broadcastNames"
+           label="&firegoose.broadcastNames.label;"
+           oncommand="FG_broadcastListFromPageToGaggle();"
+           tooltiptext="&firegoose.broadcastNames.tooltip;"
+           disabled="true"
+           />
+  <command id="fgcmd_broadcastMatrix"
+           label="&firegoose.broadcastMatrix.label;"
+           oncommand=""
+           tooltiptext="&firegoose.broadcastMatrix.tooltip;"
+           disabled="true"
+           />
+  <command id="fgcmd_broadcastNetwork"
+           label="&firegoose.broadcastNetwork.label;"
+           oncommand="FG_broadcastNetworkFromPageToGaggle();"
+           tooltiptext="&firegoose.broadcastNetwork.tooltip;"
+           disabled="true"
+           />
+  -->
+  
+  <command id="fgcmd_captureSelection"
+           label="&firegoose.captureSelection.label;"
+           oncommand="FG_captureSelection()"
+           tooltiptext="&firegoose.captureSelection.tooltip;"
+           disabled="false"
+           />
+  <command id="fgcmd_searchEntrezGene"
+           label="&firegoose.searchEntrezGene.label;"
+           oncommand="FG_searchEntrezGene()"
+           tooltiptext="&firegoose.searchEntrezGene.tooltip;"
+           disabled="false"
+           />
+  <command id="fgcmd_searchEntrezTaxonomy"
+           label="&firegoose.searchEntrezTaxonomy.label;"
+           oncommand="FG_searchEntrezTaxonomy()"
+           tooltiptext="&firegoose.searchEntrezTaxonomy.tooltip;"
+           disabled="false"
+           />
+  <command id="fgcmd_setSpecies"
+           label="&firegoose.setSpecies.label;"
+           oncommand="FG_openSpeciesDialog()"
+           tooltiptext="&firegoose.setSpecies.tooltip;"
+           disabled="false"
+           />
+  <command id="fgcmd_importWebsiteHandler"
+           label="Import Website Handler"
+           oncommand="FG_importWebsiteHandler()"
+           accessKey="&firegoose.import.website.handler.accesskey;"
+           tooltiptext="If the current browser window holds a javascript file, eval it."
+           disabled="false"
+           />
+  <command id="fgcmd_gaggleWebsite"
+           label="Gaggle Website"
+           oncommand="FG_gaggleWebsite()"
+           tooltiptext="&firegoose.gaggleWebsite.tooltip;"
+           disabled="false"
+           />
+  <command id="fgcmd_accessGaggleTools"
+           label="Gaggle Software Tools"
+           oncommand="FG_accessGaggleTools()"
+           tooltiptext="&firegoose.accessGaggleTools.tooltip;"
+           disabled="false"
+           />
+</commandset>
+
+
+<keyset id="mainKeyset">
+  <key id="fgkey_importWebsiteHandler" command="fgcmd_importWebsiteHandler"
+       key="i" 
+       modifiers="alt accel" />
+</keyset>
+
+
+<toolbox id="navigator-toolbox">
+  <toolbar id="fg_firegooseToolbar" toolbarname="Gaggle Toolbar" accesskey="G"
+           hidden="false" persist="hidden"
+		   class="chromeclass-toolbar" context="toolbar-context-menu">
+
+       <hbox align="center">
+    <image id="fg_statusLight" tooltiptext="Not Connected" src="chrome://firegoose/skin/disconnected.png" />
+    <toolbarbutton id="fg_registerOrUpdateButton"
+    			   image="chrome://firegoose/skin/Gaggle.png"
+    			   type="menu-button"
+    			   oncommand="FG_connectOrUpdate();"
+    			   tooltiptext="Connect to the Gaggle"
+    			   class="firegoose_menubutton">
+    	<menupopup id="fg_gaggleMenu">
+        	<menuitem id="fg_connectMenu" command="fgcmd_connect" tooltiptext="&firegoose.connect.tooltip;"/>
+        	<menuitem id="fg_disconnectMenu" command="fgcmd_disconnect" tooltiptext="&firegoose.disconnect.tooltip;"/>
+        	<menuitem id="fg_updateMenu" command="fgcmd_update" tooltiptext="&firegoose.update.tooltip;"/>
+        	<menuseparator/>
+			<menuitem command="fgcmd_setSpecies" tooltiptext="&firegoose.setSpecies.tooltip;"/>
+        	<menuseparator/>
+			<menuitem command="fgcmd_gaggleWebsite" tooltiptext="&firegoose.gaggleWebsite.tooltip;"/>
+			<menuitem command="fgcmd_accessGaggleTools" tooltiptext="&firegoose.accessGaggleTools.tooltip;"/>
+        	<menuseparator/>
+        	<menuitem id="fg_helpMenu" image="chrome://firegoose/skin/help.png"
+        			  command="fgcmd_help" class="menuitem-iconic"
+        			  tooltiptext="&firegoose.help.tooltip;"/>
+            <menuitem command="fgcmd_about" tooltiptext="About the Firegoose toolbar"/>
+    	</menupopup>
+    </toolbarbutton>
+
+      <toolbarbutton id="fg_executeNextWorkflowButton" command="fgcmd_executeNextWorkflow"/>
+
+      <label value="Gaggle Data:" control="fg_broadcastChooser"/>
+      <image src="chrome://firegoose/skin/data.png" />
+      <menulist id="fg_broadcastChooser" disabled="false" width="360" maxheight="28" minheight="28"
+				oncommand="FG_adjustBroadcastButton();"
+				tooltiptext="Select the Gaggle data to be broadcast">
+        <menupopup id="fg_broadcastChooserPopup">
+        </menupopup>
+      </menulist>
+
+      <label value="Target:" control="fg_targetChooser"/>
+      <image src="chrome://firegoose/skin/target.png" />
+      <menulist id="fg_targetChooser" disabled="false" width="200" maxheight="28" minheight="28"
+      			oncommand="FG_adjustBroadcastButton();"
+				tooltiptext="Select the goose to be the target of future broadcasts">
+        <menupopup id="fg_targetChooserPopup">
+        </menupopup>
+      </menulist>
+      <toolbarbutton id="fg_showGooseButton" command="fgcmd_showGoose"/>
+      <toolbarbutton id="fg_hideGooseButton" command="fgcmd_hideGoose"/>
+      <toolbarbutton id="fg_broadcastButton" command="fgcmd_broadcast"
+        align="center" image="chrome://firegoose/skin/broadcast.png"/>
+
+<!-- 
+      <label value="Target:" control="fg_targetChooser"/>
+      <image src="chrome://firegoose/skin/target.png"/>
+      <menulist id="fg_targetChooser" disabled="false" width="200"
+      			oncommand="FG_adjustBroadcastButton();"
+				tooltiptext="Select the goose to be the target of future broadcasts">
+        <menupopup id="fg_targetChooserPopup">
+        </menupopup>
+      </menulist>
+      <toolbarbutton id="fg_showGooseButton" command="fgcmd_showGoose"/>
+      <toolbarbutton id="fg_hideGooseButton" command="fgcmd_hideGoose"/>
+      <toolbarbutton id="fg_broadcastButton" command="fgcmd_broadcast" image="chrome://firegoose/skin/broadcast.png"/>
+-->
+
+<!-- 
+    <groupbox orient="horizontal">
+      <menulist id="fg_gooseChooser" disabled="false" width="200"
+               oncommand="FG_selectGoose(this.getAttribute('label'));"
+               tooltiptext="Select the goose to be the target of future broadcasts">
+        <menupopup id="fg_gooseChooserPopup">
+        </menupopup>
+      </menulist>
+
+      <toolbarbutton id="fg_showGooseButton" command="fgcmd_showGoose"/>
+      <toolbarbutton id="fg_hideGooseButton" command="fgcmd_hideGoose"/>
+      <toolbarbutton id="fg_broadcastNamesButton" command="fgcmd_broadcastNames"/>
+      <toolbarbutton id="fg_broadcastMatrixButton" command="fgcmd_broadcastMatrix"/>
+      <toolbarbutton id="fg_broadcastNetworkButton" command="fgcmd_broadcastNetwork"/>
+    </groupbox>
+
+
+    <groupbox orient="horizontal">
+      <toolbarbutton id="fg_broadcastFromPageButton" label="page:  0"
+           oncommand="FG_broadcastFromPageToWebsite();"
+           disabled="true"
+           tooltiptext="Broadcast names on page to current web site."/>
+
+      <menulist id="fg_webSiteChooser" disabled="false" width="200"
+               tooltiptext="Select a web site">
+        <menupopup id="fg_webSiteChooserPopup">
+        </menupopup>
+      </menulist>
+
+      <toolbarbutton id="fg_broadcastFromGaggleButton" label="gaggle:  0"
+           oncommand="FG_broadcastFromGaggleToWebsite();"
+           disabled="true"
+           tooltiptext="Broadcast names from gaggle to current web site."/>
+    </groupbox>
+-->
+
+<!-- 
+	<toolbarbutton command="fgcmd_test"/>
+-->
+   </hbox>
+  </toolbar>
+</toolbox>
+
+<menupopup id="menu_ToolsPopup">
+  <menuseparator/>
+  <menu id="fg_toolsMenu" label="&firegoose.menu.label;" accesskey="&firegoose.menu.accesskey;">
+    <menupopup>
+      <menuitem id="fg_autoStartBoss" type="checkbox"
+                oncommand="FG_updateAutoStartBoss(this.getAttribute('checked')=='true');"
+     	        label="&firegoose.autostartboss.label;"
+     	        tooltiptext="&firegoose.autostartboss.tooltip;" />
+      <menuitem command="fgcmd_connect"/>
+      <menuitem command="fgcmd_disconnect"/>
+      <menuseparator/>
+      <menuitem command="fgcmd_jvmInfo"/>
+      <menuseparator/>
+      <menuitem command="fgcmd_captureSelection"/>
+      <menuitem command="fgcmd_setSpecies"/>
+      <!-- 
+      <menuitem command="fgcmd_hello"/>
+       -->
+      <menuseparator/>
+      <menuitem command="fgcmd_enableWebsites"/>
+      <menuitem command="fgcmd_importWebsiteHandler" key="fgkey_importWebsiteHandler"/>
+      <menuseparator/>
+      <menuitem command="fgcmd_gaggleWebsite" tooltiptext="&firegoose.gaggleWebsite.tooltip;"/>
+      <menuitem command="fgcmd_accessGaggleTools" tooltiptext="&firegoose.accessGaggleTools.tooltip;"/>
+      <menuseparator/>
+      <menuitem command="fgcmd_help"/>
+      <menuitem command="fgcmd_about"/>
+    </menupopup>
+  </menu>
+</menupopup>
+
+<popup id="contentAreaContextMenu">
+  <menuseparator/>
+  <menuitem id="fgSearchEntrezGeneMenuItem"
+            command="fgcmd_searchEntrezGene"/>
+  <menuitem id="fgSearchEntrezTaxonomy"
+            command="fgcmd_searchEntrezTaxonomy"/>
+  <menuitem id="fgCaptureSelectionMenuItem"
+            command="fgcmd_captureSelection"/>
+</popup>
+
+</overlay>

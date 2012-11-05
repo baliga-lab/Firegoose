@@ -1,0 +1,46 @@
+
+#fg_firegooseToolbar toolbarbutton:hover  {
+    background:  #AAAAAA !important;
+    color: #0000FF !important;
+}
+
+.test {
+    background:  #CCCCCC !important;
+    color: #0000FF;
+}
+
+.firegoose_title {
+  color: #DD9933;
+  font-size: 36pt;
+  font-weight: bold;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+}
+
+
+.firegoose_menubutton > .toolbarbutton-menubutton-button {
+  -moz-box-orient: horizontal;
+}
+
+.dialogTitle {
+  background:  #336699 !important;
+  color: #ffffff !important;
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: center;
+  padding: 0.5em;
+  border: groove #AAAAAA;
+}
+
+#websiteList {
+	background: #CCCCDD;
+	height: 160px;
+}
+
+#firegooseAbout description {
+	margin-left: 4pt;
+	margin-right: 4pt;
+	width: 28em;
+}
+
+

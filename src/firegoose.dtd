@@ -1,0 +1,87 @@
+<!ENTITY firegoose.version "@version@">
+<!ENTITY firegoose.build.date "@date@">
+
+<!ENTITY firegoose.hello.label "Hello">
+<!ENTITY firegoose.jvm_info.label "JVM Info">
+<!ENTITY firegoose.test.label "Test">
+<!ENTITY firegoose.about.label "About Firegoose">
+<!ENTITY firegoose.about.accesskey "a">
+<!ENTITY firegoose.menu.label "Firegoose">
+<!ENTITY firegoose.menu.accesskey "f">
+
+<!ENTITY firegoose.help.label "Help">
+<!ENTITY firegoose.help.accesskey "h">
+<!ENTITY firegoose.help.tooltip "Get help with the Gaggle Firegoose Toolbar.">
+
+<!ENTITY firegoose.enableWebsites.label "Enable Website Handlers">
+<!ENTITY firegoose.enableWebsites.accesskey "w">
+<!ENTITY firegoose.enableWebsites.tooltip "Enable more website handlers.">
+
+<!ENTITY firegoose.addCustomWebsiteHandler.label "Add Custom Website Handler.">
+
+<!ENTITY firegoose.preferences.label "Preferences">
+<!ENTITY firegoose.preferences.accesskey "p">
+<!ENTITY firegoose.preferences.tooltip "View and set Firegoose preferences.">
+
+<!ENTITY firegoose.autostartboss.label "Autostart Boss">
+<!ENTITY firegoose.autostartboss.accesskey "a">
+<!ENTITY firegoose.autostartboss.tooltip "Automatically start the Gaggle Boss if it is not running.">
+
+<!ENTITY firegoose.connect.label "Connect to Gaggle">
+<!ENTITY firegoose.connect.accesskey "c">
+<!ENTITY firegoose.connect.tooltip "Register with a Gaggle Boss running on your computer.">
+
+<!ENTITY firegoose.update.label "Update Goose List">
+<!ENTITY firegoose.update.accesskey "u">
+<!ENTITY firegoose.update.tooltip "Refresh the list of geese.">
+
+<!ENTITY firegoose.disconnect.label "Disconnect from Gaggle">
+<!ENTITY firegoose.disconnect.accesskey "d">
+<!ENTITY firegoose.disconnect.tooltip "Disconnect from the Gaggle">
+
+<!ENTITY firegoose.showGoose.label "Show">
+<!ENTITY firegoose.showGoose.accesskey "s">
+<!ENTITY firegoose.showGoose.tooltip "Show the current goose.">
+
+<!ENTITY firegoose.hideGoose.label "Hide">
+<!ENTITY firegoose.hideGoose.accesskey "h">
+<!ENTITY firegoose.hideGoose.tooltip "Hide the current goose.">
+
+<!ENTITY firegoose.broadcast.label "Broadcast">
+<!ENTITY firegoose.broadcast.accesskey "b">
+<!ENTITY firegoose.broadcast.tooltip "Broadcast selected data to the target.">
+
+<!ENTITY firegoose.broadcastNames.label "B">
+<!ENTITY firegoose.broadcastNames.accesskey "b">
+<!ENTITY firegoose.broadcastNames.tooltip "Broadcast selected names to the current goose.">
+
+<!ENTITY firegoose.broadcastMatrix.label "M">
+<!ENTITY firegoose.broadcastMatrix.accesskey "m">
+<!ENTITY firegoose.broadcastMatrix.tooltip "Broadcast matrix to the current goose.">
+
+<!ENTITY firegoose.broadcastNetwork.label "N">
+<!ENTITY firegoose.broadcastNetwork.accesskey "N">
+<!ENTITY firegoose.broadcastNetwork.tooltip "Broadcast network to the current goose.">
+
+<!ENTITY firegoose.captureSelection.label "Capture Selection">
+<!ENTITY firegoose.captureSelection.accesskey "c">
+<!ENTITY firegoose.captureSelection.tooltip "Capture the selected names for broadcast to the Gaggle.">
+
+<!ENTITY firegoose.setSpecies.label "Set Default Species">
+<!ENTITY firegoose.setSpecies.accesskey "s">
+<!ENTITY firegoose.setSpecies.tooltip "Manually set the species for the next broadcast.">
+
+<!ENTITY firegoose.import.website.handler.accesskey "i">
+
+<!ENTITY firegoose.searchEntrezGene.label "Search in Entrez Gene">
+<!ENTITY firegoose.searchEntrezGene.tooltip "Search Entrez Gene for the selected term(s).">
+
+<!ENTITY firegoose.searchEntrezTaxonomy.label "Search in Entrez Taxonomy">
+<!ENTITY firegoose.searchEntrezTaxonomy.tooltip "Search Entrez Taxonomy for the selected term.">
+
+<!ENTITY firegoose.gaggleWebsite.tooltip "Open the Gaggle website in a new browser tab.">
+<!ENTITY firegoose.accessGaggleTools.tooltip "Open the Gaggle blank-slate page from which you can launch Gaggle software tools.">
+
+<!ENTITY firegoose.executeNextWorkflow.label "Next">
+<!ENTITY firegoose.executeNextWorkflow.accesskey "w">
+<!ENTITY firegoose.executeNextWorkflow.tooltip "Execute the next step of the workflow.">

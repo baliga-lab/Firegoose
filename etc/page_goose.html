@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+ <title>Gaggle Page Goose</title>
+ <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+ <meta http-equiv="Content-Language" content="en-us" />
+
+ <style type="text/css">
+  .hidden {
+    display: none;
+  }
+  .gaggle-matrix-tsv {
+    color: red;
+  }
+ </style>
+
+<script type="text/javascript" charset="utf-8">
+	function print(x) {
+		var outputDiv = document.getElementById("output");
+		outputDiv.appendChild(document.createTextNode(x));
+		outputDiv.appendChild(document.createElement("br"));
+	}
+
+  var goose = new Object();
+  goose.handleNameList = function(species, names) {
+		print("species = " + species);
+		
+		// if the broadcast comes from the boss, it will be a Java String array
+		// rather than a javascript array.
+		var a = []
+		for (var i=0; i<names.length; i++) {
+			a.push(names[i]);
+		}
+		print("names = " + a);
+	}
+</script>
+</head>
+
+<body>
+ <h1>Gaggle Page Goose</h1>
+ 
+ <p>A test page that can receive broadcasts in the Firegoose. So far only <b>namelist</b> implemented.</p>
+ 
+ <h2>Output:</h2>
+ <div id="output">
+ </div>
+
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+<head>
+<title>Test of Firegoose API</title>
+<script type="text/javascript">
+	function print(x) {
+		var outputDiv = document.getElementById("output");
+		outputDiv.appendChild(document.createTextNode(x));
+		outputDiv.appendChild(document.createElement("br"));
+	}
+
+	var goose = new Object();
+	goose.handleNameList = function(species, names) {
+		print("species = " + species);
+		
+		// if the broadcast comes from the boss, it will be a Java String array
+		// rather than a javascript array.
+		var a = []
+		for (var i=0; i<names.length; i++) {
+			a.push(names[i]);
+		}
+		print("names = " + a);
+	}
+
+	goose.name = "George";
+	
+	function broadcast(targets, message) {
+		if (goose.boss) {
+			goose.boss.broadcast(targets, message);
+		}
+		else {
+			print("no boss registered");
+		}
+	}
+
+	function test() {
+		dump("testing...\n");
+		var targets = ["PIPE"];
+		var message = new Object();
+		message.type = "NameList";
+		message.source = "Joe Mamma";
+		message.name = "test-tickle";
+		message.size = 6;
+		message.species = "Moose";
+		message.data = ["asdf", "asdf2", "abcd", "efgh", "ijkl", "mnop"];
+		broadcast(targets, message);
+	}
+</script>
+</head>
+
+<body>
+
+<h1>Firegoose API</h1>
+
+<p>Don't press this button: <button name="test" onclick="test()">Test</button></p>
+
+<h2>Output:</h2>
+<div id="output">
+</div>
+
+</body>
+</html>

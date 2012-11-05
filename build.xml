@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+<!--
+		Ant Build file
+-->
+<project name="FireGoose" default="all" basedir=".">
+
+	<!-- set global properties for this build -->
+	<property name="src.dir"       location="${basedir}/src/main"/>
+	<property name="test.dir"      location="${basedir}/test/main"/>
+	<property name="lib.dir"       location="${basedir}/lib"/>
+	<property name="build.dir"     location="${basedir}/firefox/components/classes"/>
+	<property name="dist.dir"      location="${basedir}/dist"/>
+	<property name="misc.dir"      location="${basedir}/misc"/>
+	<property name="temp.dir"      location="${basedir}/temp"/>
+
+	<property name="app.name"      value="FireGoose"/>
+	<property name="jar.name"      value="${app.name}.jar"/>
+
+	<property name="version"       value="1.0"/>
+
+
+	<!-- Classpath -->
+	<path id="app.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="clean" description="Remove previous artifacts">
+		<delete dir="${build.dir}" />
+		<mkdir dir="${build.dir}"/>
+	</target>
+
+	<target name="clean-dist" description="Remove previous dist artifacts">
+		<delete dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}"/>
+	</target>
+
+	<target name="init" description="Get setup">
+		<!-- Create the time stamp -->
+		<tstamp>
+			<format property="timestamp" pattern="yyyy-MM-dd HH:mm:ss"/>
+		</tstamp>
+	</target>
+
+	<target name="increment-build-number" depends="init">
+		<buildnumber/>
+		<echo>Building version: ${version}.${build.number}</echo>
+		<filter token="version" value="${version}.${build.number}"/>
+		<filter token="date" value="${timestamp}"/>
+		<copy file="${basedir}/src/install.rdf" todir="${basedir}/firefox" overwrite="true" filtering="true"/>
+		<copy file="${basedir}/src/firegoose.dtd" todir="${basedir}/firefox/chrome/locale/en-US" overwrite="true" filtering="true"/>
+		<copy file="${basedir}/src/firegoose.properties" todir="${basedir}/firefox/chrome/locale/en-US" overwrite="true" filtering="true"/>
+	</target>
+
+
+	<target name="update.rdf">
+		<filter token="version" value="${version}.${build.number}"/>
+		<copy file="${basedir}/src/firegoose_update.rdf" todir="${dist.dir}" filtering="true"/>
+	</target>
+
+	<target name="copy-resources" depends="init">
+		<property file="build.number"/>
+		<filter token="version" value="${version}.${build.number}"/>
+		<filter token="date" value="${timestamp}"/>
+		<copy file="${basedir}/src/install.rdf" todir="${basedir}/firefox" overwrite="true" filtering="true"/>
+		<copy file="${basedir}/src/firegoose.dtd" todir="${basedir}/firefox/chrome/locale/en-US" overwrite="true" filtering="true"/>
+		<copy file="${basedir}/src/firegoose.properties" todir="${basedir}/firefox/chrome/locale/en-US" overwrite="true" filtering="true"/>
+	</target>
+
+	<target name="copy-lib">
+		<delete dir="${basedir}/firefox/components/lib" />
+		<mkdir dir="${basedir}/firefox/components/lib"/>
+		<copy todir="${basedir}/firefox/components/lib">
+			<fileset dir="${lib.dir}">
+				<!-- Avoid copying the pluging jar.
+				     I think it's included in the browser, but should verify -->
+				<exclude name="**/*lugin.jar"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true" target="1.6">
+			<classpath refid="app.classpath" />
+		</javac>
+	</target>
+
+	<target name="build-xpi" depends="clean,increment-build-number,clean-dist,compile,update.rdf,copy-lib">
+		<zip destfile="${dist.dir}/firegoose-${version}.${build.number}.xpi"
+			basedir="${basedir}/firefox"/>
+	</target>
+
+	<target name="all" depends="build-xpi" description="Recompile and build XPI file">
+	</target>
+
+</project>
+

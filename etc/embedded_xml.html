@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+<head>
+<title>Test embedded XML</title>
+<style type="text/css">
+ .hidden {
+   display: none;
+ }
+</style>
+
+</head>
+
+<body>
+	<h1>Test embedded XML</h1>
+	<h2>NameList</h2>
+	<div name="gaggle_xml" class="hidden">
+		<gaggleData version="0.1">
+			<namelist type="direct" name="Orf names" species="Halobacterium sp. NRC-1">
+				VNG0536G
+			</namelist>
+		</gaggleData>
+	</div>
+
+	<h2>Indirect NameList</h2>
+	<div name="gaggle_xml" class="hidden">
+		<gaggleData version="0.1">
+			<namelist type="indirect" name="Orf names indirect" species="Halobacterium sp. NRC-1" url="file:/Users/cbare/Documents/work/eclipse-workspace-isb/FireGoose/etc/namelist.txt" size="18"/>
+		</gaggleData>
+	</div>
+
+<!--
+	<h2>Key/Value pairs (tuple)</h2>
+	<div name="gaggle_xml" class="hidden">
+		<gaggleData version="0.1">
+			<tuple type="direct" name="test-tuple" species="Halobacterium sp. NRC-1" size="5">
+				Giant Steps	John Coltrane
+				Out to Lunch	Eric Dolphy
+				Kind of Blue	Miles Davis
+				Monk&apos;s Music	Thelonious Monk
+				Waltz for Debby	Bill Evans
+			</tuple>
+		</gaggleData>
+	</div>
+-->
+
+<h2>DataMatrix</h2>
+<div name="gaggle_xml" class="hidden">
+	<gaggleData version="0.1">
+		<dataMatrix type="direct" name="test-matrix" species="Halobacterium sp. NRC-1" size="7,1">
+Song	length
+Giant Steps	4.47
+Cousin Mary	5.50
+Countdown	2.26
+Spiral	6.01
+Syeeda's Song Flute	7.05
+Naima	4.24
+Mr. P.C.	7.02
+		</dataMatrix>
+	</gaggleData>
+</div>
+
+<h2>Indirect DataMatrix</h2>
+<div name="gaggle_xml" class="hidden">
+	<gaggleData version="0.1">
+		<dataMatrix type="indirect" name="test-matrix-indirect" species="Halobacterium sp. NRC-1" size="8,1"
+			url="file:/Users/cbare/Documents/work/eclipse-workspace-isb/FireGoose/etc/matrix.txt">
+		</dataMatrix>
+	</gaggleData>
+</div>
+
+
+
+</body>
+</html>

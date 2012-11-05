@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://firegoose/skin/overlay.css" type="text/css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://firegoose/locale/firegoose.dtd">
+
+<dialog id="fgEnableWebsites"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="&firegoose.enableWebsites.label;"
+        buttons="accept,cancel"
+        ondialogaccept="FG_dialogAccept();" >
+
+  <script type="application/x-javascript" src="firegoose.js"/>
+
+  <script type="application/x-javascript">
+	var windowParams = window.arguments[0];
+
+	window.addEventListener("load", function() { FG_dialogInit(); }, false);
+	
+	function FG_dialogInit() {
+		FG_trace("preferences init");
+		var prefs = Components.classes["@mozilla.org/preferences-service;1"].
+  		            getService(Components.interfaces.nsIPrefBranch);
+
+		function isVisible(name) {
+			try {
+		    	return prefs.getBoolPref(FG_fixName(name));
+		    }
+		    catch (e) {
+		    	return true;
+		    }
+		}
+
+		function createListItem(name, visible) {
+		    var item = document.createElement("richlistitem");
+		    var checkbox = document.createElement("checkbox");
+		    checkbox.setAttribute("label", name);
+		    checkbox.setAttribute("checked", visible);
+		    item.appendChild(checkbox);
+		    return item;
+		}
+
+        var websiteList = document.getElementById("websiteList");
+
+		for (var name in windowParams.websiteHandlers) {
+			if (!windowParams.websiteHandlers[name].dontDisplayInMenu)
+		    	websiteList.appendChild(createListItem(name, isVisible(name)));
+		}
+	}
+
+	function FG_dialogAccept() {
+		FG_trace("ok");
+
+        function toBoolean(value) {
+        	if ("true" == value)
+				return true;
+			else
+				return false;
+		}
+		
+		var prefs = Components.classes["@mozilla.org/preferences-service;1"].
+  		            getService(Components.interfaces.nsIPrefBranch);
+
+        var websiteList = document.getElementById("websiteList");
+        var children = websiteList.childNodes;
+
+		for (var i=0; i &lt; children.length; i++) {
+			var node = children.item(i).firstChild;
+			var checked = toBoolean(node.getAttribute("checked"));
+			var name = node.getAttribute("label");
+			prefs.setBoolPref(FG_fixName(name), checked);
+		}
+		
+		windowParams["ok"] = true;
+  	}
+  </script>
+
+  <vbox flex="1">
+	<label control="websiteList" class="dialogTitle" value="Enable Websites" />
+    <separator/>
+	<description style="width: 30em;">
+      Select the target websites that will be visible in the drop-down menu. Some
+      targets listed here are experimental.
+	</description>
+    <separator/>
+    <richlistbox id="websiteList" flex="1" tooltiptext="Enable or disable firegoose access to websites">
+    </richlistbox>
+  </vbox>
+
+  <separator/>
+
+</dialog>
