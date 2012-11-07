@@ -134,6 +134,16 @@ var FG_pageListener = {
 
 	onPageLoad: function(aEvent) {
 		if (aEvent.originalTarget.nodeName == "#document") {
+      // Re-establish connection to Java
+      FG_trace('establishing connection to Java plugin...');
+      var appletRef = document.getElementById('fireGooseApplet');
+      window.java = appletRef.Packages.java;
+      java = window.java;
+      FG_trace('set java variable into global namespace to re-establish compatibility...');
+      FG_trace('initializing Java Firegoose loader...');
+      javaFiregooseLoader.init();
+      FG_trace('Java Firegoose loaded');
+
 			dump("on page load event\n");
 			var doc = aEvent.originalTarget;
             var clearPageData = true;
@@ -324,12 +334,12 @@ function FG_initialize() {
 	        if (topic == "quit-application-granted") {
 	            this.unregister();
 	            try {
-			    	var goose = javaFiregooseLoader.getGoose();
-			    	goose.disconnectFromGaggle();
+			    	      var goose = javaFiregooseLoader.getGoose();
+			    	      goose.disconnectFromGaggle();
 	            }
 	            catch (e) {
-	            	dump("attempt to disconnect from Gaggle failed:\n");
-	            	dump(e);
+	            	  dump("attempt to disconnect from Gaggle failed:\n");
+	            	  dump(e);
 	            }
 	        }
 	    },
@@ -451,55 +461,45 @@ function TabOpenHandler(event)
  * their properties.
  */
 function FG_initUI() {
-	var goose = javaFiregooseLoader.getGoose();
-	if (goose) {
-		FG_isConnected = goose.isConnected();
-	}
+	  FG_isConnected = FG_isConnectedToGaggle();
 
-	try {
-		var prefs = Components.classes["@mozilla.org/preferences-service;1"].
-				getService(Components.interfaces.nsIPrefBranch);
+	  try {
+		    var prefs = Components.classes["@mozilla.org/preferences-service;1"].
+				    getService(Components.interfaces.nsIPrefBranch);
 
-		// get the preferences setting for autoStartBoss
-		var autoStartBoss = prefs.getBoolPref("extension.firegoose.autoStartBoss");
+		    // get the preferences setting for autoStartBoss
+		    var autoStartBoss = prefs.getBoolPref("extension.firegoose.autoStartBoss");
 
-		// check the menu item for autoStartBoss
-		if (autoStartBoss) {
-			var autoStartBossMenuItem = document.getElementById("fg_autoStartBoss");
-			autoStartBossMenuItem.setAttribute("checked", "true");
-		}
-	}
-	catch (e) {
-		FG_trace("Error reading setting for autoStartBoss:\n" + e);
-	}
+		    // check the menu item for autoStartBoss
+		    if (autoStartBoss) {
+			      var autoStartBossMenuItem = document.getElementById("fg_autoStartBoss");
+			      autoStartBossMenuItem.setAttribute("checked", "true");
+		    }
+	  } catch (e) {
+		    FG_trace("Error reading setting for autoStartBoss:\n" + e);
+	  }
+	  FG_adjustUi();
+	  FG_populateTargetChooser();
 
-	FG_adjustUi();
-	FG_populateTargetChooser();
-
-	// I used to start and stop the polling when we connected
-	// and disconnected with the boss, but that caused problems
-	// with multiple windows. If one window initiated a
-	// connection, the other(s) wouldn't realized they were
-	// connected. So, now we just start the timer and leave
-	// it running whether connected or not.
-	FG_startTimedEvent();
-
-	FG_trace("finished initUI");
+	  // I used to start and stop the polling when we connected
+	  // and disconnected with the boss, but that caused problems
+	  // with multiple windows. If one window initiated a
+	  // connection, the other(s) wouldn't realized they were
+	  // connected. So, now we just start the timer and leave
+	  // it running whether connected or not.
+	  FG_startTimedEvent();
+	  FG_trace("finished initUI");
 }
-
-
 
 function FG_startTimedEvent() {
 	FG_timerIntervalId = setInterval('FG_pollGoose()', 1000);
 }
-
 
 function FG_clearTimedEvent() {
 	if (FG_timerIntervalId) {
 		clearInterval(FG_timerIntervalId);
 	}
 }
-
 
 /**
  * log a message to the javascript console
@@ -511,7 +511,6 @@ function FG_trace(msg) {
         .getService(Components.interfaces.nsIConsoleService)
             .logStringMessage(msg);
 }
-
 
 function FG_hello() {
 	alert("hello");
@@ -940,7 +939,7 @@ function FG_objectToJavaTuple(object) {
 
 function FG_isConnectedToGaggle() {
     var goose = javaFiregooseLoader.getGoose();
-    return goose.isConnected();
+    return goose ? goose.isConnected() : false;
 }
 
 
@@ -951,8 +950,7 @@ function FG_isConnectedToGaggle() {
 function FG_connectOrUpdate() {
     if (!FG_isConnectedToGaggle()) {
         FG_connectToGaggle();
-    }
-    else {
+    } else {
         FG_populateTargetChooser();
     }
 }
@@ -962,50 +960,43 @@ function FG_connectOrUpdate() {
  * already
  */
 function FG_connectToGaggle(initializingFiregoose) {
-
     try {
-        var goose = javaFiregooseLoader.getGoose();
-
-        if (goose.isConnected()) {
+        if (FG_isConnectedToGaggle()) {
             // don't reconnect if already connected
             FG_trace("connectToGaggle: already connected to Gaggle");
-        }
-        else {
+        } else {
+            var goose = javaFiregooseLoader.getGoose();
             FG_trace("connectToGaggle: connecting to Gaggle");
+            if (goose) {
+                // try to connect
+                // The behavior I want here differs from the autostart behavior
+                // defined in RmiGaggleConnector. If a boss is running
+                // when Firegoose starts, connect to it. If the preference
+                // extension.firegoose.autoStartBoss is set, autostart a
+                // boss when Firegoose starts, otherwise don't. When the
+                // user clicks "Connect to Gaggle" always use the autostart
+                // behavior.
+                if (initializingFiregoose && !FG_getAutoStartBoss()) {
+                    goose.connectToGaggleIfAvailable();
+                } else {
+                    goose.connectToGaggle();
+                }
 
-            // try to connect
-            // The behavior I want here differs from the autostart behavior
-            // defined in RmiGaggleConnector. If a boss is running
-            // when Firegoose starts, connect to it. If the preference
-            // extension.firegoose.autoStartBoss is set, autostart a
-            // boss when Firegoose starts, otherwise don't. When the
-            // user clicks "Connect to Gaggle" always use the autostart
-            // behavior.
-            if (initializingFiregoose && !FG_getAutoStartBoss()) {
-                goose.connectToGaggleIfAvailable();
-            }
-            else {
-                goose.connectToGaggle();
-            }
-
-            // this should throw an exception if connection failed, but
-            // apparently it gets eaten somewhere.
-
-            // did connecting fail? If we're auto-starting the boss
-            // should start shortly, but probably won't be started yet.
-            if (!goose.getAutoStartBoss() && !goose.isConnected()) {
-                throw new Error("Failed to connect to the Gaggle");
+                // this should throw an exception if connection failed, but
+                // apparently it gets eaten somewhere.
+                // did connecting fail? If we're auto-starting the boss
+                // should start shortly, but probably won't be started yet.
+                if (!goose.getAutoStartBoss() && !goose.isConnected()) {
+                    throw new Error("Failed to connect to the Gaggle");
+                }
             }
         }
-
-    }
-    catch (e) {
+    } catch (e) {
         FG_trace(e);
         if (!initializingFiregoose) {
             alert("failed to connect to gaggle");
         }
     }
-
     // adjust the UI
     //	FG_adjustUi();
     //	FG_populateTargetChooser();
@@ -1047,8 +1038,7 @@ function FG_getAutoStartBoss() {
  * page data
  */
 function FG_adjustUi() {
-    var goose = javaFiregooseLoader.getGoose();
-    var connected = goose.isConnected();
+    var connected = FG_isConnectedToGaggle();
 
     // to enable a command you set the attribute "disabled"
     // to the string "false". To disable, set "disabled" to "true"
@@ -1102,6 +1092,7 @@ function FG_adjustUi() {
     var status = document.getElementById("fg_statusLight");
     if (connected) {
         // display our goose name as a tooltip
+        var goose = javaFiregooseLoader.getGoose();
         status.setAttribute("tooltiptext", "Connected as: " + goose.getName());
         status.setAttribute("src", "chrome://firegoose/skin/connected.png");
     }
@@ -1173,17 +1164,17 @@ function FG_requestHide() {
  * haven't figured out a means to call into javascript from java.
  */
 function FG_pollGoose() {
-    var goose = javaFiregooseLoader.getGoose();
+    var connected = FG_isConnectedToGaggle();
 
-    var connected = goose.isConnected();
     if (connected != FG_isConnected) {
         FG_adjustUi();
         FG_populateTargetChooser();
         FG_isConnected = connected;
     }
 
-    //dump("Goose connected: " + goose.isConnected());
-    if (goose.isConnected()) {
+    if (connected) {
+        var goose = javaFiregooseLoader.getGoose();
+
         // Process workflow requests
         var requestID = goose.getWorkflowRequest();
         //dump("Polling RequestID: " + requestID + "\n");
@@ -1202,17 +1193,14 @@ function FG_pollGoose() {
         if (value > FG_previousNewDataSignalValue) {
             FG_previousNewDataSignalValue = value;
             var gaggleData = new FG_GaggleDataFromGoose();
-
             FG_gaggleDataHolder.put(gaggleData);
             FG_populateBroadcastChooser(gaggleData.getDescription());
         }
-
         var value = goose.checkTargetUpdateSignal();
         if (value > FG_previousTargetUpdateSignalValue) {
             FG_previousTargetUpdateSignalValue = value;
             FG_populateTargetChooser();
         }
-
     }
 }
 
@@ -1346,12 +1334,12 @@ function FG_populateTargetChooser() {
     }
 
     // delete existing menu items
-    for (var i=popup.childNodes.length - 1; i>=0; i--) {
+    for (var i = popup.childNodes.length - 1; i>=0; i--) {
         popup.removeChild(popup.childNodes.item(i));
     }
 
-    var goose = javaFiregooseLoader.getGoose();
-    if (goose && goose.isConnected()) {
+    if (FG_isConnectedToGaggle()) {
+        var goose = javaFiregooseLoader.getGoose();
         // add "Boss" to popup menu
         newMenuItem = document.createElement("menuitem");
         newMenuItem.setAttribute("label", "Boss");
@@ -1361,15 +1349,14 @@ function FG_populateTargetChooser() {
 
         // add new geese to popup menu
         var gooseNames = goose.getGooseNames();
-	    for (var i=0; i<gooseNames.length; i++) {
+	      for (var i=0; i<gooseNames.length; i++) {
             newMenuItem = document.createElement("menuitem");
             newMenuItem.setAttribute("label", gooseNames[i]);
             newMenuItem.setAttribute("tooltiptext", "Send broadcasts to " + gooseNames[i]);
             newMenuItem.setAttribute("type", "GaggleGoose");
             popup.appendChild(newMenuItem);
         }
-    }
-    else {
+    } else {
         var menuItem = document.createElement("menuitem");
         menuItem.setAttribute("label", "Not connected to Boss");
         menuItem.setAttribute("tooltiptext", "Not connected to Boss");
@@ -1387,8 +1374,7 @@ function FG_populateTargetChooser() {
     function isVisible(name) {
         try {
             return prefs.getBoolPref(FG_fixName(name));
-        }
-        catch (e) {
+        } catch (e) {
             return true;
         }
     }
