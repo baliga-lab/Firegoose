@@ -48,7 +48,7 @@ var javaFiregooseLoader = {
 		}
 
 		// create our class loader
-		var jars = ["boss.jar", "gaggle-connector.jar", "firefoxClassLoader.jar"];
+		var jars = ["firegoose-deps.jar", "firefoxClassLoader.jar"];
 		this._createClassLoader(jars);
 
 		// create the goose object
@@ -105,21 +105,6 @@ var javaFiregooseLoader = {
 		}
 		return javaArray;
 	},
-
-    // Converts a java string array to a delimited string
-    jsStringArrayToDelimitedString: function(a, delimit) {
-        if (a != undefined && delimit != undefined)
-        {
-            var result = "";
-            for (var i = 0; i < a.length; i++)
-            {
-                 result += a[i];
-                 result += delimit;
-            }
-            dump("\nConverted delimited string: " + result);
-            return result;
-        }
-    },
 
 	/**
 	 * Converts a 2D array of js Floats to a 2D java array of doubles.
@@ -315,7 +300,7 @@ var javaFiregooseLoader = {
 };
 
 // initialize when loaded
-javaFiregooseLoader.init();
+//javaFiregooseLoader.init();
 
 // test ability to load java classes and create gaggle data objects
 //javaFiregooseLoader.test();

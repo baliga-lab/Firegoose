@@ -294,9 +294,6 @@ function FG_initialize() {
 
         //add custom websites created previously
         loadPreviouslyCreatedCustomWebsiteHandlers();
-
-        Application.activeWindow.events.addListener("TabOpen", TabOpenHandler);
-
 /*
 		try {
          // get the preferences setting for autoStartBoss
@@ -444,15 +441,6 @@ function FG_registerTargetChangeListener() {
 	FG_trace("registered target change listener");
 }
 
-function TabOpenHandler(event)
-{
-    var tab = event.data.BrowserTab;
-	Application.console.log(tab.uri.spec);
-	alert("Opened tab: " + tab.uri.spec);
-
-	// The load event fires when the document has finished loading
-    //tab.events.addListener("load", function() { tab.document.body.innerHTML = "<H1>HelloWorld</H1>"; });
-}
 
 /**
  * adjusts UI for user preferences and initial connection status.
@@ -610,12 +598,6 @@ function FG_openAboutWindow() {
 function FG_help() {
     // open the kegg URL in a new tab
     var newTab = getBrowser().addTab("http://gaggle.systemsbiology.org/docs/geese/firegoose/");
-    getBrowser().selectedTab = newTab;
-}
-
-function FG_openTab(uri)
-{
-    var newTab = getBrowser().addTab(uri);
     getBrowser().selectedTab = newTab;
 }
 
@@ -803,28 +785,21 @@ function FG_dispatchBroadcast(broadcastData, target, targetType) {
  */
 function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     var handler = FG_websiteHandlers[target];
-    var datatype = broadcastData.getType();
-    dump("\nWeb handler: " + handler);
-    dump("\ndata type " + datatype);
-    dump("\ntarget: " + target);
-    dump("\nData: " + broadcastData.getData());
 
-    if (datatype == "NameList") {
-        dump("\nHandle namelist\n");
+    if (broadcastData.getType() == "NameList") {
         if (handler.handleNameList) {
-            dump("Can handle namelist");
             handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
         }
     }
-    else if (datatype == "Map") {
+    else if (broadcastData.getType() == "Map") {
         if (handler.handleMap) {
             handler.handleMap(
                     broadcastData.getSpecies(),
                     broadcastData.getName(),
-                    FG_objectToJavaHashMap(data));
+                    FG_objectToJavaHashMap(broadcastData.getData()));
         }
     }
-    else if (datatype == "Network") {
+    else if (broadcastData.getType() == "Network") {
             if (handler.handleNetwork) {
                 handler.handleNetwork(broadcastData.getSpecies(), broadcastData.getData());
             }
@@ -834,36 +809,33 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 if (names)
                     handler.handleNameList(broadcastData.getSpecies(), names);
             }
-    }
-    else if (datatype == "DataMatrix") {
-            if (handler.handleMatrix) {
-                handler.handleMatrix(broadcastData);
+        }
+        else if (broadcastData.getType() == "DataMatrix") {
+                if (handler.handleMatrix) {
+                    handler.handleMatrix(broadcastData.getData());
+                }
+                // if target doesn't take a matrix, use row names as a name list
+                else if (handler.handleNameList) {
+                    var names = broadcastData.getDataAsNameList();
+                    if (names)
+                        handler.handleNameList(broadcastData.getSpecies(), names);
+                }
             }
-            // if target doesn't take a matrix, use row names as a name list
-            else if (handler.handleNameList) {
-                var names = broadcastData.getDataAsNameList();
-                if (names)
-                    handler.handleNameList(broadcastData.getSpecies(), names);
-            }
-    }
-    else if (datatype == "Cluster") {
-            dump("\nHandle cluster\n");
-            if (handler.handleCluster) {
-                dump("STARTING Handle cluster\n");
-                handler.handleCluster(
-                        broadcastData.getSpecies(),
-                        broadcastData.getName(),
-                        broadcastData.rowNames,
-                        broadcastData.columnNames);
-            }
-            // if target doesn't take a cluster, use row names as a name list
-            else if (handler.handleNameList) {
-                var names = broadcastData.getDataAsNameList();
-                if (names)
-                    handler.handleNameList(broadcastData.getSpecies(), names);
-            }
-            dump("Cluster handled.");
-    }
+            else if (broadcastData.getType() == "Cluster") {
+                    if (handler.handleCluster) {
+                        handler.handleCluster(
+                                broadcastData.getSpecies(),
+                                broadcastData.getName(),
+                                broadcastData.getData().rowNames,
+                                broadcastData.getData().columnNames);
+                    }
+                    // if target doesn't take a cluster, use row names as a name list
+                    else if (handler.handleNameList) {
+                        var names = broadcastData.getDataAsNameList();
+                        if (names)
+                            handler.handleNameList(broadcastData.getSpecies(), names);
+                    }
+                }
 }
 
 
@@ -1001,7 +973,6 @@ function FG_connectToGaggle(initializingFiregoose) {
     //	FG_adjustUi();
     //	FG_populateTargetChooser();
 }
-
 
 function FG_disconnectFromGaggle() {
     // stop polling for broadcasts
@@ -1174,22 +1145,10 @@ function FG_pollGoose() {
 
     if (connected) {
         var goose = javaFiregooseLoader.getGoose();
-
-        // Process workflow requests
-        var requestID = goose.getWorkflowRequest();
-        //dump("Polling RequestID: " + requestID + "\n");
-        if (requestID != undefined && requestID != null)
-        {
-            var gaggleWorkflowData = new FG_GaggleWorkflowDataFromGoose(requestID);
-            FG_WorkflowDataReceived(gaggleWorkflowData);
-            goose.removeWorkflowRequest(requestID);
-        }
-
         // we want to check if there's new data from the Gaggle,
         // and if not don't bother doing anything, otherwise we'll
         // be updating the GUI every second, which isn't too cool.
         var value = goose.checkNewDataSignal();
-        //dump("\nNew signal value: " + value + " Previous value: " + FG_previousNewDataSignalValue + "\n");
         if (value > FG_previousNewDataSignalValue) {
             FG_previousNewDataSignalValue = value;
             var gaggleData = new FG_GaggleDataFromGoose();
@@ -1203,6 +1162,7 @@ function FG_pollGoose() {
         }
     }
 }
+
 
 /**
  * Implements the same interface as a FG_GaggleData object, but
@@ -1238,18 +1198,11 @@ FG_GaggleDataFromGoose.prototype.getSpecies = function() {
 
 FG_GaggleDataFromGoose.prototype.getData = function() {
     var goose = javaFiregooseLoader.getGoose();
-    var data = goose.getNameList();
-    if (data != undefined && data.length != undefined)
-    {
-        for (var i = 0; i < data.length; i++)
-        {
-            dump("Namelist " + i + ": " + data[i] + "\n");
-        }
-    }
-    return data;
+    return goose.getNameList();
 
     // TODO:  handle all data types here and in FireGoose.java
 }
+
 
 /**
  * adds entries to the Gaggle Data drop-down menu.
