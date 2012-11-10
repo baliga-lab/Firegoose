@@ -6,6 +6,24 @@ function FG_WorkflowDataReceived(gaggleData)
     {
         dump("Workflow data received....\n");
         var action = gaggleData.getWorkflowAction();
+
+        // set the UI
+        var targets = action.getTargets();
+        var pnl = document.getElementById("fg_nextcomponents");
+        if (targets != undefined && targets != null)
+        {
+            var nextcomponents = "";
+            for (var i = 0; i < targets.length; i++)
+            {
+                var component = targets[i];
+                dump("Target component name: " + component.getName());
+                nextcomponents += (component.getName() + " ");
+            }
+            dump("\n" + nextcomponents + "\n");
+            pnl.value = nextcomponents;
+        }
+
+
         dump("Workflow data " + gaggleData.getType() + " received for Session: " + action.getSessionID() + "\n");
         FG_Current_WorkflowAction = {};
         FG_Current_WorkflowAction.SessionID = action.getSessionID();
@@ -34,7 +52,7 @@ function FG_WorkflowDataReceived(gaggleData)
 }
 
 
-function FG_GetDataForTargets()
+function FG_GetDataForTargets(sessionID)
 {
     // Parse the web page using web handlers and obtain data for each target component
     // return a list of GaggleData
@@ -43,10 +61,23 @@ function FG_GetDataForTargets()
     if (chooser.selectedItem) {
         dump("Broadcast chooser: " + chooser.selectedItem.getAttribute("value"));
         var broadcastData = FG_gaggleDataHolder.get(chooser.selectedItem.getAttribute("value"));
+
+        if (broadcastData.isAsynch) {
+            dump("fetching data asynchronously...\n");
+            broadcastData.asynchronouslyFetchData(
+                    function() {
+                        data.push(broadcastData);
+                        FG_processWorkflowResponseData(data, sessionID);
+                    });
+        }
+        else {
+            data.push(broadcastData);
+        }
+
         //alert(broadcastData.getType());
 
-        data.push(broadcastData);
-        data.push(broadcastData);
+
+        //data.push(broadcastData);
     }
     return data;
 }
@@ -55,13 +86,19 @@ function FG_executeNextWorkflow(sessionID)
 {
     dump("===============>Next workflow component<=================\n");
 
-    var data = FG_GetDataForTargets();
+    var sessionID = FG_Current_WorkflowAction.SessionID;
+    var data = FG_GetDataForTargets(sessionID);
+    FG_processWorkflowResponseData(data, sessionID);
+}
+
+function FG_processWorkflowResponseData(data, sessionID)
+{
     if (data != null && data.length > 0)
     {
         var goose = javaFiregooseLoader.getGoose();
         if (goose != null)
         {
-            var sessionID = FG_Current_WorkflowAction.SessionID;
+
             dump("About to submit " + data.length + " data to the boss\n");
             for (var i = 0; i < data.length; i++)
             {
@@ -77,7 +114,9 @@ function FG_executeNextWorkflow(sessionID)
                                          i,
                                          broadcastData.getName(),
                                          broadcastData.getSpecies(),
-                                         broadcastData.getData()
+                                         //broadcastData.getData()
+                                         delimitedString,
+                                         "!"
                                          );
                 }
                 else if (broadcastData.getType() == "Map") {
@@ -91,10 +130,15 @@ function FG_executeNextWorkflow(sessionID)
                 }
                 else if (broadcastData.getType() == "Network") {
                         // network is a java object
+                        dump("Processing Network\n");
                         var network = broadcastData.getData();
-                        // TODO is this necessary? apply defaulting to species
-                        network.setSpecies(broadcastData.getSpecies());
-                        goose.submitNetwork(sessionID, i, network);
+                        if (network != undefined)
+                        {
+                            dump("Network retrieved");
+                            // TODO is this necessary? apply defaulting to species
+                            network.setSpecies(broadcastData.getSpecies());
+                            goose.submitNetwork(sessionID, i, network);
+                        }
                 }
                 else if (broadcastData.getType() == "DataMatrix") {
                         // matrix is a java object
@@ -126,16 +170,23 @@ function FG_executeNextWorkflow(sessionID)
 /**
  * Delegates calls to the java goose to get workflow data
 **/
-function FG_GaggleWorkflowDataFromGoose(requestID) {
-    this.requestID = requestID;
+function FG_GaggleWorkflowDataFromGoose() {
 }
 
 // the name "gaggle" is required for a cheap and sleazy hack in FG_gaggleDataHolder
 //FG_GaggleWorkflowDataFromGoose.prototype = new FG_GaggleData("gaggle", requestID);
+FG_GaggleWorkflowDataFromGoose.prototype = new FG_GaggleData("gaggle");
+
+//FG_GaggleWorkflowDataFromGoose.prototype.setRequestID(requestID)
+//{
+//    dump("Setting requestID: " + requestID);
+//    this.requestID = requestID;
+//}
 
 FG_GaggleWorkflowDataFromGoose.prototype.getType = function() {
     var goose = javaFiregooseLoader.getGoose();
-    return goose.getWorkflowDataType(this.requestID);
+    this._type = goose.getWorkflowDataType(this.requestID);
+    return this._type;
 }
 
 FG_GaggleWorkflowDataFromGoose.prototype.getSize = function() {

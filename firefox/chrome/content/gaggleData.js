@@ -57,6 +57,7 @@ FG_GaggleData.prototype._sizeString = function() {
 }
 
 FG_GaggleData.prototype.getData = function() {
+    dump("Gaggle prototype getData...\n");
 	return this._data;
 }
 
@@ -88,7 +89,8 @@ FG_GaggleData.prototype.setConvertToJavaOnGetData = function() {
 	var oldGetData = this.getData;
 	if (!oldGetData._already_setConvertToJavaOnGetData) {
 		this.getData = function() {
-			
+			dump("GaggleData.getData()");
+
 			// getData may already be overridden to read data lazily
 		    var data = oldGetData.call(this);
 
@@ -104,6 +106,7 @@ FG_GaggleData.prototype.setConvertToJavaOnGetData = function() {
 				// getSpecies or we set up an infinite recursion. So, how to get
 				// a sample name for guessing species?
 				if (this.getType() == "Network") {
+				    dump("Converting network to Java object....");
 					this._data = FG_GaggleData.jsToJavaNetwork(this.getName(), this.getSpecies(), data);
 				}
 				else if (this.getType() == "DataMatrix") {
@@ -122,7 +125,10 @@ FG_GaggleData.prototype.getDataAsNameList = function() {
 	if (this._type=='Network') {
 		var network = this.getData();
 		if (network) {
-			return network.getNodes();
+		    if (network.getNodes != undefined)
+			    return network.getNodes();
+			else
+			    return network;
 		}
 	}
 	else if (this._type=="DataMatrix") {
@@ -197,5 +203,11 @@ FG_GaggleData.jsToJavaNetwork = function(name, species, jsNetwork) {
 	}
 
 	return network;
+}
+
+FG_GaggleData.prototype.setRequestID = function(requestID)
+{
+    dump("Setting RequestID: " + requestID);
+    this.requestID = requestID;
 };
 

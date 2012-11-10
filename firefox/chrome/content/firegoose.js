@@ -1110,6 +1110,9 @@ function FG_adjustUi() {
         status.setAttribute("src", "chrome://firegoose/skin/disconnected.png");
     }
 
+    var pnl = document.getElementById("fg_nextcomponents");
+    pnl.style.backgroundColor = "white";
+
     FG_adjustBroadcastButton();
 }
 
@@ -1189,7 +1192,9 @@ function FG_pollGoose() {
         //dump("Polling RequestID: " + requestID + "\n");
         if (requestID != undefined && requestID != null)
         {
-            var gaggleWorkflowData = new FG_GaggleWorkflowDataFromGoose(requestID);
+            var gaggleWorkflowData = new FG_GaggleWorkflowDataFromGoose();
+            gaggleWorkflowData.setRequestID(requestID);
+            dump("Setting requestID...");
             FG_WorkflowDataReceived(gaggleWorkflowData);
             goose.removeWorkflowRequest(requestID);
         }
@@ -1249,6 +1254,7 @@ FG_GaggleDataFromGoose.prototype.getSpecies = function() {
 }
 
 FG_GaggleDataFromGoose.prototype.getData = function() {
+    dump("GaggleDataFromGoose: getData...");
     var goose = javaFiregooseLoader.getGoose();
     var data = goose.getNameList();
     if (data != undefined && data.length != undefined)
