@@ -2,7 +2,9 @@
 <?xml-stylesheet href="chrome://firegoose/skin/overlay.css" type="text/css"?>
 <!DOCTYPE overlay SYSTEM "chrome://firegoose/locale/firegoose.dtd">
 
-<overlay id="fg_toolbar" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id="fg_toolbar"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <stringbundleset id="stringbundleset"> 
   <stringbundle id="strings_firegoose" src="chrome://firegoose/locale/firegoose.properties"/>
@@ -62,6 +64,13 @@
     FG_initialize();
 </script>
 
+<!-- Starting in V16, Firefox does not allow access to window.java.
+     We need to embed this applet in order to access the Java plugin
+-->
+<html:div name="appletDiv">
+  <html:embed id ="fireGooseApplet" type="application/x-java-applet;version=1.6" 
+    code="java.applet.Applet"  pluginspage="http://java.com/download/"  MAYSCRIPT="true" width="0" height="0" />   
+</html:div>
 
 <commandset id="mainCommandSet">
   <command id="fgcmd_hello" label="&firegoose.hello.label;" oncommand="FG_hello();" tooltiptext="Say hello."/>
