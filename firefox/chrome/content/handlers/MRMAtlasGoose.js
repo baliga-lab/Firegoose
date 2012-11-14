@@ -53,6 +53,7 @@ FG_MRMAtlas.handleNameList = function(species, names) {
 	if (element)
 	{
 		this.insertNamelistIntoPasteBox(doc);
+		return FG_Current_Tab;
 	}
 	else {
 		// open url in a new tab
@@ -75,6 +76,7 @@ FG_MRMAtlas.handleNameList = function(species, names) {
 		// register the closure as a listener
 		browser.addEventListener("load", onPageLoadClosure, true);
 		browser.loadURI(FG_MRMAtlas.url);
+		return newTab;
 	}
 }
 

@@ -31,10 +31,6 @@ function FG_WorkflowDataReceived(gaggleData)
         FG_setWorkflowUI(action);
 
         dump("Workflow data " + gaggleData.getType() + " received for Session: " + action.getSessionID() + "\n");
-        //FG_Current_WorkflowAction = {};
-        //FG_Current_WorkflowAction.SessionID = action.getSessionID();
-        //FG_Current_WorkflowAction.RequestID = action.requestID;
-        //dump("WorkflowAction RequestID: " + FG_Current_WorkflowAction.RequestID);
         var newTab;
         if (gaggleData.getType() == "WorkflowData")
         {
@@ -42,9 +38,6 @@ function FG_WorkflowDataReceived(gaggleData)
             var data = (gaggleData.getData())[0];
             newTab = getBrowser().addTab(data);
             getBrowser().selectedTab = newTab;
-
-            //alert(newTab);
-
         }
         else
         {

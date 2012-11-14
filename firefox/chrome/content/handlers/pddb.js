@@ -69,5 +69,6 @@ FG_addWebsiteHandler("Prion Disease Database (PDDB)", {
 
 		var newTab = getBrowser().addTab(url);
 		getBrowser().selectedTab = newTab;
+		return newTab;
 	}
 });

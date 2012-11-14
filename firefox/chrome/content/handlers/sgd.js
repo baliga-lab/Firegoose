@@ -153,6 +153,7 @@ FG_sgd.prototype.getPageData = function(doc) {
  * this.searchType should be defined in the constructor
  */
 FG_sgd.prototype.handleNameList = function(species, names) {
+    // TODO: do we want to support multiple tabs?
 
 	if (this.searchType == FG_sgd.GENE_SEARCH) {
 		/**
@@ -169,6 +170,7 @@ FG_sgd.prototype.handleNameList = function(species, names) {
 				// open the SGD URL in a new tab
 				var newTab = getBrowser().addTab(url);
 				getBrowser().selectedTab = newTab;
+				tabs.push(newTab);
 			}		
 		}
 	} else {
@@ -188,6 +190,7 @@ FG_sgd.prototype.handleNameList = function(species, names) {
 		}
 		getBrowser().selectedTab = newTab;
 		browser.loadURI(url);
+		return newTab;
 	}	
 	
 }

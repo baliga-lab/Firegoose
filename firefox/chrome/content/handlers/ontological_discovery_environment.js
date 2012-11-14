@@ -42,6 +42,7 @@ FG_OntDiscEnvHandler.handleCluster= function(species, name, genes, description) 
 	// open the URL in a new tab
 	var newTab = getBrowser().addTab(url);
 	getBrowser().selectedTab = newTab;
+	return newTab;
 }
 
 FG_OntDiscEnvHandler.handleNameList = function(species, genes) {

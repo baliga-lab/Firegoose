@@ -126,6 +126,8 @@ var FG_pageListener = {
 		    FG_setWorkflowUI(action);
 		    FG_Current_Tab = aEvent.target;
 		}
+		else
+		    FG_setWorkflowUI(null);
 	},
 
 	// javascript in the page can generate gaggleDataEvents

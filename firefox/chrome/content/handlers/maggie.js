@@ -47,6 +47,7 @@ var FG_maggieHandler = {
 		var url = "http://maggie.systemsbiology.net/main/start";
 		getBrowser().selectedTab = newTab;
 		browser.loadURI(url);
+		return newTab;
 	},
 
 	createOnloadFormFiller: function(species, names) {

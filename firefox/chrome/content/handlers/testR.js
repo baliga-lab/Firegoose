@@ -38,7 +38,10 @@ FG_testR.handleNameList = function(species, names) {
 		var element = doc.getElementsByName("genes");
 
 		if (element)
+		{
 			this.insertNamelistIntoGenesTextArea(doc);
+			return FG_Current_Tab;
+	    }
 	}
 	else {
 		// open url in a new tab
@@ -60,6 +63,7 @@ FG_testR.handleNameList = function(species, names) {
 		// register the closure as a listener
 		browser.addEventListener("load", this.onPageLoadClosure, true);
 		browser.loadURI(url);
+		return newTab;
 	}
 }
 

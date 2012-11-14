@@ -77,6 +77,7 @@ FG_stampHandler.handleMatrix = function(matrix) {
 		var url = "http://www.benoslab.pitt.edu/stamp/";
 		getBrowser().selectedTab = newTab;
 		browser.loadURI(url);
+		return newTab;
 	}
 	catch (e) {
 		FG_trace("Error loading STAMP page:" + e);

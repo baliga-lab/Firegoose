@@ -76,6 +76,7 @@ FG_Entrez.prototype.handleNameList = function(species, names) {
 	// open the URL in a new tab
 	var newTab = getBrowser().addTab(url);
 	getBrowser().selectedTab = newTab;
+	return newTab;
 }
 
 // register a website handler each for Entrez gene and Entrez protein

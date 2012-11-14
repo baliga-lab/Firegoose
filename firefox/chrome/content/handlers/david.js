@@ -77,6 +77,8 @@ FG_david.handleNameList = function(species, names) {
 		// register the closure as a listener
 		browser.addEventListener("load", onPageLoadClosure, true);
 		browser.loadURI(url);
+
+		return newTab;
 	}
 }
 

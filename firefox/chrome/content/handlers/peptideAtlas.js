@@ -37,6 +37,7 @@ FG_addWebsiteHandler("Peptide Atlas", {
 
 		var newTab = getBrowser().addTab(url);
 		getBrowser().selectedTab = newTab;
+		return newTab;
 	}
 
 });
