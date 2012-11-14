@@ -27,7 +27,7 @@ var javaFiregooseLoader = {
 
 	init: function() {
 		dump("initializing JavaFiregooseLoader...\n");
-		dump("Java version: " + java.lang.System.getProperty("java.version") + "\n");
+		//dump("Java version: " + java.lang.System.getProperty("java.version") + "\n");
 		
 		// maybe this is easier?
 		// this.stringClass = java.lang.System.getProperty("java.version").getClass();
@@ -53,6 +53,10 @@ var javaFiregooseLoader = {
 
 		// create the goose object
 		this._goose = this._createJavaFiregooseObject();
+		if (this._goose == undefined || this._goose == null)
+		{
+		    dump("\nFailed to create Firegoose!!\n");
+		}
 	},
 
 	getGoose: function() {

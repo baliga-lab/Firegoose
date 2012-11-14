@@ -30,6 +30,8 @@ import org.systemsbiology.gaggle.geese.common.GooseShutdownHook;
  *
  * @author cbare
  */
+
+
 public class FireGoose implements Goose3, GaggleConnectionListener {
     String activeGooseNames[] = new String[0];
     RmiGaggleConnector connector = new RmiGaggleConnector(this);
@@ -48,10 +50,12 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
     WorkflowManager workflowManager = new WorkflowManager();
 
-
     // This class takes a workflowAction and parses it into
-    // various properties, which will be retrieved by the
-    // Firegoose polling thread
+// various properties, which will be retrieved by the
+// Firegoose polling thread.
+// It also serves as a staging area for firegoose to submit data for all the target
+// components one by one. Once all the data is submitted, we call boss.handleWorkflowAction
+// with the response
     class WorkflowGaggleData
     {
         String species = "Unknown";
@@ -62,6 +66,13 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         String requestID;
         String subAction;
         WorkflowAction workflowAction;
+        boolean fetched = false;
+        private WorkflowAction request;
+        private WorkflowAction response;
+        private ArrayList<WorkflowComponent> targets;
+        private ArrayList<GaggleData> data;
+
+        public WorkflowAction getWorkflowResponse() { return response; }
 
         public String getSpecies() { return species; }
         public String[] getNameList() { return nameList; }
@@ -69,20 +80,36 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         public String getType() { return type; }
         public String getRequestID() { return requestID; }
         public String getSubAction() { return subAction; }
-        public WorkflowAction getWorkflowAction() { return workflowAction; }
+        public WorkflowAction getWorkflowAction() { return request; }
+        public boolean isFetched() { return fetched; }
+        public void setFetched(boolean fetched) { this.fetched = fetched; }
 
         public WorkflowGaggleData(String requestID, WorkflowAction workflowAction)
         {
+            this.requestID = requestID;
+            this.request = workflowAction;
+            this.response = new WorkflowAction(request.getSessionID(),
+                    WorkflowAction.ActionType.Response,
+                    request.getSource(),
+                    null,
+                    request.getOption() | WorkflowAction.Options.SuccessMessage.getValue(),
+                    null
+            );
+            this.targets = new ArrayList<WorkflowComponent>();
+            this.data = new ArrayList<GaggleData>();
+
             if (workflowAction != null)
             {
                 System.out.println("=====> Initializing Workflow data " + requestID);
-                this.requestID = requestID;
                 try
                 {
                     if (workflowAction.getSource().getParams().containsKey(WorkflowComponent.ParamNames.Data.getValue()))
                     {
                         Object data = workflowAction.getSource().getParams().get(WorkflowComponent.ParamNames.Data.getValue());
-                        System.out.println(((GaggleData)data).getName());
+                        if (data instanceof GaggleData)
+                            System.out.println(((GaggleData)data).getName());
+                        else if (data instanceof  String)
+                            System.out.println((String)data);
                         System.out.println("JSON param: " + workflowAction.getSource().getJSONParams());
 
                         this.subAction = "";
@@ -94,7 +121,7 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
                         //this.actionType = "WorkflowAction";
                         //this.sessionID = workflowAction.getSessionID().toString();
-                        this.workflowAction = workflowAction;
+                        //this.workflowAction = workflowAction;
 
                         // This has to be done the latest because hasNewDataSignal.increment() is called
                         // in all the handle[GaggleData] functions
@@ -116,7 +143,15 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
                                 this.handleMatrix(workflowAction.getSource().getName(), (DataMatrix)data);
                             else if (data instanceof Namelist)
                                 this.handleNameList(workflowAction.getSource().getName(), (Namelist)data);
-                                // TODO support other data types
+                            else if (data instanceof String) // this is a uri
+                            {
+                                this.type = "WorkflowData";
+                                this.nameList = new String[1];
+                                this.nameList[0] = (String)data;
+                                System.out.println("URI data: " + this.nameList[0]);
+                            }
+
+                            // TODO support other data types
                             //else
                             //    dataProcessed = false;
                         }
@@ -126,6 +161,47 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
                 {
                     System.out.println("Failed to handle workflow action: " + e.getMessage());
                 }
+            }
+        }
+
+        public void addSessionData(int targetIndex, GaggleData gdata)
+        {
+            WorkflowComponent[] reqTargets = this.request.getTargets();
+            if (reqTargets != null)
+            {
+                if (targetIndex < reqTargets.length)
+                {
+                    System.out.println("Data added for request " + this.requestID);
+                    this.targets.add(reqTargets[targetIndex]);
+                    // gdata could be null. Fortunately ArrayList allows null elements
+                    this.data.add(gdata);
+                }
+                else
+                {
+                    System.out.println("FireGoose: index out of range of all the targets!");
+                }
+            }
+        }
+
+        public boolean finalizeWorkflowAction()
+        {
+            if (this.targets.size() > 0)
+            {
+                System.out.println("Finalize targets for " + this.request.getSessionID());
+                WorkflowComponent[] targetarray = new WorkflowComponent[this.targets.size()];
+                this.targets.toArray(targetarray);
+                this.response.setTargets(targetarray);
+
+                System.out.println("Finalize data for " + this.request.getSessionID());
+                GaggleData[] dataarray = new GaggleData[this.data.size()];
+                this.data.toArray(dataarray);
+                this.response.setData(dataarray);
+                return true;
+            }
+            else
+            {
+                System.out.println("No target for " + this.request.getSessionID());
+                return false;
             }
         }
 
@@ -160,82 +236,16 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
         private void handleNetwork(String sourceGooseName, Network network) throws RemoteException {
             System.out.println("incoming broadcast: network");
-        }
-    }
-
-
-    // This class stores the orginal request
-    // It also serves as a staging area for firegoose to submit data for all the target
-    // components one by one. Once all the data is submitted, we call boss.handleWorkflowAction
-    // with the response
-    class WorkflowStagingData
-    {
-        private WorkflowAction request;
-        private WorkflowAction response;
-        private ArrayList<WorkflowComponent> targets;
-        private ArrayList<GaggleData> data;
-
-        public WorkflowAction getWorkflowResponse() { return response; }
-
-        public WorkflowStagingData(WorkflowAction request)
-        {
-            this.request = request;
-            this.response = new WorkflowAction(request.getSessionID(),
-                                               WorkflowAction.ActionType.Response,
-                                               request.getSource(),
-                                               null,
-                                               request.getOption() | WorkflowAction.Options.SuccessMessage.getValue(),
-                                               null
-                                               );
-            this.targets = new ArrayList<WorkflowComponent>();
-            this.data = new ArrayList<GaggleData>();
-        }
-
-        public void addSessionData(int targetIndex, GaggleData gdata)
-        {
-            WorkflowComponent[] reqTargets = this.request.getTargets();
-            if (reqTargets != null)
-            {
-                if (targetIndex < reqTargets.length)
-                {
-                    System.out.println("Data added for session " + this.request.getSessionID());
-                    this.targets.add(reqTargets[targetIndex]);
-                    // gdata could be null. Fortunately ArrayList allows null elements
-                    this.data.add(gdata);
-                }
-                else
-                {
-                    System.out.println("FireGoose: index out of range of all the targets!");
-                }
-            }
-        }
-
-        public boolean finalizeWorkflowAction()
-        {
-            if (this.targets.size() > 0)
-            {
-                System.out.println("Finalize targets for " + this.request.getSessionID());
-                WorkflowComponent[] targetarray = new WorkflowComponent[this.targets.size()];
-                this.targets.toArray(targetarray);
-                this.response.setTargets(targetarray);
-
-                System.out.println("Finalize data for " + this.request.getSessionID());
-                GaggleData[] dataarray = new GaggleData[this.data.size()];
-                this.data.toArray(dataarray);
-                this.response.setData(dataarray);
-                return true;
-            }
-            else
-            {
-                System.out.println("No target for " + this.request.getSessionID());
-                return false;
-            }
+            this.species = network.getSpecies();
+            this.nameList = network.getNodes();
+            this.type = "Network";
+            this.size = String.valueOf(nameList.length);
         }
     }
 
     class WorkflowManager
     {
-        HashMap<String, WorkflowStagingData> workflowStagingDataMap = new HashMap<String, WorkflowStagingData>();
+        //HashMap<String, WorkflowStagingData> workflowStagingDataMap = new HashMap<String, WorkflowStagingData>();
         Map<String, WorkflowGaggleData> processingQueue = Collections.synchronizedMap(new HashMap<String, WorkflowGaggleData>());
 
         public WorkflowManager()
@@ -269,7 +279,10 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         public String getType(String requestID)
         {
             if (this.processingQueue.containsKey(requestID))
+            {
+                System.out.println("Workflow data type: " + this.processingQueue.get(requestID).getType());
                 return this.processingQueue.get(requestID).getType();
+            }
             return null;
         }
 
@@ -289,14 +302,14 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
                 WorkflowGaggleData wfgd = new WorkflowGaggleData(requestID.toString(), request);
                 this.processingQueue.put(requestID.toString(), wfgd);
 
-                if (!workflowStagingDataMap.containsKey(request.getSessionID())
+                /*if (!workflowStagingDataMap.containsKey(request.getSessionID())
                     && request.getTargets() != null
                     && request.getTargets().length > 0)
                 {
                     System.out.println("Store request " + request.getSessionID());
                     WorkflowStagingData r = new WorkflowStagingData(request);
                     this.workflowStagingDataMap.put(request.getSessionID(), r);
-                }
+                } */
             }
         }
 
@@ -309,13 +322,25 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
         public String getCurrentRequest()
         {
-            if (!this.processingQueue.isEmpty())
+            for (String key : this.processingQueue.keySet())
+            {
+                WorkflowGaggleData workflowGaggleData = this.processingQueue.get(key);
+                if (!workflowGaggleData.isFetched())
+                {
+                    workflowGaggleData.setFetched(true);
+                    return workflowGaggleData.getRequestID();
+                }
+            }
+            return null;
+
+            /*if (!this.processingQueue.isEmpty())
             {
                 System.out.println("Getting " + this.processingQueue.size() + " workflow requests...");
                 System.out.println((String)((this.processingQueue.keySet().toArray())[0]));
+
                 return (String)((this.processingQueue.keySet().toArray())[0]);
             }
-            return null;
+            return null; */
         }
 
         public void removeRequest(String requestID)
@@ -327,12 +352,12 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
             }
         }
 
-        public void addSessionTargetData(String sessionID, int targetIndex, GaggleData data)
+        public void addSessionTargetData(String requestID, int targetIndex, GaggleData data)
         {
-            if (this.workflowStagingDataMap.containsKey(sessionID))
+            if (this.processingQueue.containsKey(requestID))
             {
-                System.out.println("Adding data for " + sessionID);
-                WorkflowStagingData stagingData = this.workflowStagingDataMap.get(sessionID);
+                System.out.println("Adding data for " + requestID);
+                WorkflowGaggleData stagingData = this.processingQueue.get(requestID);
                 if (stagingData != null)
                 {
                     stagingData.addSessionData(targetIndex, data);
@@ -340,33 +365,35 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
             }
         }
 
-        public boolean finalizeSessionAction(String sessionID)
+        public boolean finalizeSessionAction(String requestID)
         {
-            if (this.workflowStagingDataMap.containsKey(sessionID))
+            if (this.processingQueue.containsKey(requestID))
             {
-                WorkflowStagingData stagingData = this.workflowStagingDataMap.get(sessionID);
-                System.out.println("Finalizing response for " + sessionID);
+                WorkflowGaggleData stagingData = this.processingQueue.get(requestID);
+                System.out.println("Finalizing response for " + requestID);
                 return stagingData.finalizeWorkflowAction();
             }
+            else
+                System.out.println("No data exists for " + requestID + ". Finalize session failed!!");
             return false;
         }
 
-        public WorkflowAction getSessionResponse(String sessionID)
+        public WorkflowAction getSessionResponse(String requestID)
         {
-            if (this.workflowStagingDataMap.containsKey(sessionID))
+            if (this.processingQueue.containsKey(requestID))
             {
-                System.out.println("Response data for " + sessionID);
-                return this.workflowStagingDataMap.get(sessionID).getWorkflowResponse();
+                System.out.println("Response data for " + requestID);
+                return this.processingQueue.get(requestID).getWorkflowResponse();
             }
             return null;
         }
 
-        public void RemoveSessionData(String sessionID)
+        public void RemoveSessionData(String requestID)
         {
-            if (this.workflowStagingDataMap.containsKey(sessionID))
+            if (this.processingQueue.containsKey(requestID))
             {
-                this.workflowStagingDataMap.remove(sessionID);
-                System.out.println("Session data removed for " + sessionID);
+                this.processingQueue.remove(requestID);
+                System.out.println("Session data removed for " + requestID);
             }
         }
     }
@@ -604,6 +631,7 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
     public void connectToGaggle() throws Exception {
     	try {
+            System.out.println("connectToGaggle...");
 	    	if (!connector.isConnected()) {
 	    		gooseName = defaultGooseName;
 	    		connector.connectToGaggle();
@@ -620,6 +648,7 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
      */
     public void connectToGaggleIfAvailable() throws Exception {
     	boolean autostart = connector.getAutoStartBoss();
+        System.out.println("ConnectToGaggleIfAvailable...");
 		try {
 			connector.setAutoStartBoss(false);
 			connector.connectToGaggle();
@@ -694,18 +723,18 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
     // Submit a NameList to the workflow manager
     // names is a delimited string of all the names
-    public void submitNameList(String sessionID, int targetIndex, String name, String species, String[] names) //, String delimit)
+    public void submitNameList(String requestID, int targetIndex, String name, String species, String names, String delimit)
     {
-        //System.out.println("Got Namelist..." + names + " " + delimit);
+        System.out.println("Got Namelist..." + names + " " + delimit);
         try
         {
             Namelist namelist = new Namelist();
             namelist.setName(name);
             namelist.setSpecies(species);
-            //String[] splittedstrings = names.split(delimit);
-            namelist.setNames(names); //.split(delimit));
-            this.workflowManager.addSessionTargetData(sessionID, targetIndex, namelist);
-            System.out.println("Added namelist to workflow manager " + sessionID);
+            String[] splittedstrings = names.split(delimit);
+            namelist.setNames(splittedstrings);
+            this.workflowManager.addSessionTargetData(requestID, targetIndex, namelist);
+            System.out.println("Added namelist to workflow manager " + requestID);
         }
         catch (Exception e)
         {
@@ -713,17 +742,17 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         }
     }
 
-    public void submitNetwork(String sessionID, int targetIndex, Network network) {
-        this.workflowManager.addSessionTargetData(sessionID, targetIndex, network);
-        System.out.println("Added network to workflow manager " + sessionID);
+    public void submitNetwork(String requestID, int targetIndex, Network network) {
+        this.workflowManager.addSessionTargetData(requestID, targetIndex, network);
+        System.out.println("Added network to workflow manager " + requestID);
     }
 
-    public void submitDataMatrix(String sessionID, int targetIndex, DataMatrix matrix) {
-        this.workflowManager.addSessionTargetData(sessionID, targetIndex, matrix);
-        System.out.println("Added Matrix to workflow manager " + sessionID);
+    public void submitDataMatrix(String requestID, int targetIndex, DataMatrix matrix) {
+        this.workflowManager.addSessionTargetData(requestID, targetIndex, matrix);
+        System.out.println("Added Matrix to workflow manager " + requestID);
     }
 
-    public void submitMap(String sessionID, int targetIndex, String species, String name, HashMap<String, String> map) {
+    public void submitMap(String requestID, int targetIndex, String species, String name, HashMap<String, String> map) {
         System.out.println("Map not implemented");
 //        try {
 //            boss.broadcast(gooseName, targetGoose, species, name, map);
@@ -734,20 +763,22 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 //        }
     }
 
-    public void submitCluster(String sessionID, int targetIndex, String species, String name,
+    public void submitCluster(String requestID, int targetIndex, String species, String name,
                               String [] rowNames, String [] columnNames)
     {
         Cluster cluster = new Cluster(name, species, rowNames, columnNames);
-        this.workflowManager.addSessionTargetData(sessionID, targetIndex, cluster);
-        System.out.println("Added cluster to workflow manager " + sessionID);
+        this.workflowManager.addSessionTargetData(requestID, targetIndex, cluster);
+        System.out.println("Added cluster to workflow manager " + requestID);
     }
 
     // All the data are ready, we submit the response to the boss
-    public void CompleteWorkflowAction(String sessionID)
+    public boolean CompleteWorkflowAction(String requestID)
     {
-        if (this.workflowManager.finalizeSessionAction(sessionID))
+        boolean succeeded = false;
+        System.out.println("About to complete workflow action for " + requestID);
+        if (this.workflowManager.finalizeSessionAction(requestID))
         {
-            WorkflowAction response = this.workflowManager.getSessionResponse(sessionID);
+            WorkflowAction response = this.workflowManager.getSessionResponse(requestID);
             if (response != null)
             {
                 if (boss instanceof Boss3)
@@ -757,6 +788,7 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
                         System.out.println("About to send workflow response to boss...");
                         ((Boss3)boss).handleWorkflowAction(response);
                         System.out.println("Data Sent!");
+                        succeeded = true;
                     }
                     catch (Exception e)
                     {
@@ -767,7 +799,11 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
                     System.out.println("Boss does not support Workflow!");
             }
         }
-        this.workflowManager.RemoveSessionData(sessionID);
+
+        if (succeeded)
+            this.workflowManager.RemoveSessionData(requestID);
+
+        return succeeded;
     }
 
 

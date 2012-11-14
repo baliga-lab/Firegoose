@@ -613,6 +613,7 @@ var FG_emblString = {
 			+ "&" + this.callerIdentity();
 		getBrowser().selectedTab = newTab;
 		browser.loadURI(url);
+		return newTab;
 	},
 
 

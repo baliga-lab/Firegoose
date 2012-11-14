@@ -40,7 +40,7 @@ var FG_isConnected = false;
 // @see the function FG_pollGoose().
 var FG_previousNewDataSignalValue = 0;
 var FG_previousTargetUpdateSignalValue = 0;
-
+var FG_java;
 
 /**
  * I want to pass this object to java and have it called from
@@ -115,6 +115,17 @@ var FG_pageListener = {
 
 	onTabSelect: function(aEvent) {
 		this.scanPage(window.content.document);
+
+		// Update workflow UI
+        var tabvalue = aEvent.target.value;
+        //dump("\nTab " + tabvalue + " selected\n");
+		var gaggleWorkflowData = FG_findWorkflowData(tabvalue);
+		if (gaggleWorkflowData != null)
+		{
+		    var action = gaggleWorkflowData.getWorkflowAction();
+		    FG_setWorkflowUI(action);
+		    FG_Current_Tab = aEvent.target;
+		}
 	},
 
 	// javascript in the page can generate gaggleDataEvents
@@ -134,15 +145,20 @@ var FG_pageListener = {
 
 	onPageLoad: function(aEvent) {
 		if (aEvent.originalTarget.nodeName == "#document") {
-      // Re-establish connection to Java
-      FG_trace('establishing connection to Java plugin...');
-      var appletRef = document.getElementById('fireGooseApplet');
-      window.java = appletRef.Packages.java;
-      java = window.java;
-      FG_trace('set java variable into global namespace to re-establish compatibility...');
-      FG_trace('initializing Java Firegoose loader...');
-      javaFiregooseLoader.init();
-      FG_trace('Java Firegoose loaded');
+		    if (FG_java == undefined)
+		    {
+                // Re-establish connection to Java
+                FG_trace('establishing connection to Java plugin...');
+                var appletRef = document.getElementById('fireGooseApplet');
+                window.java = appletRef.Packages.java;
+                FG_java = window.java;
+                FG_trace('set java variable into global namespace to re-establish compatibility...');
+                FG_trace('initializing Java Firegoose loader...');
+                javaFiregooseLoader.init();
+                // Try to connect to Gaggle after init
+                FG_connectToGaggle(true);
+                FG_trace('Java Firegoose loaded');
+            }
 
 			dump("on page load event\n");
 			var doc = aEvent.originalTarget;
@@ -295,7 +311,7 @@ function FG_initialize() {
         //add custom websites created previously
         loadPreviouslyCreatedCustomWebsiteHandlers();
 
-        Application.activeWindow.events.addListener("TabOpen", TabOpenHandler);
+        //Application.activeWindow.events.addListener("TabOpen", TabOpenHandler);
 
 /*
 		try {
@@ -369,9 +385,6 @@ function FG_initialize() {
 //	goose.setDebugToFile(true);
 }
 
-
-
-
 /**
  * register listeners that cause the page to be scanned whenever a
  * new page is loaded and when the user switches to a new browser tab.
@@ -388,7 +401,9 @@ function FG_registerPageListeners() {
 	// add listener for tab select events
 	var tabs = document.getElementById("content").tabContainer;
 	if (tabs)
+	{
 		tabs.addEventListener("select", function(aEvent) { FG_pageListener.onTabSelect(aEvent); }, true);
+    }
 	else
 		FG_trace("Warning: unable to register tab select listener");
 
@@ -442,16 +457,6 @@ function FG_registerTargetChangeListener() {
 	targetChooser.addEventListener("ValueChange", onChangeTarget, false);
 
 	FG_trace("registered target change listener");
-}
-
-function TabOpenHandler(event)
-{
-    var tab = event.data.BrowserTab;
-	Application.console.log(tab.uri.spec);
-	alert("Opened tab: " + tab.uri.spec);
-
-	// The load event fires when the document has finished loading
-    //tab.events.addListener("load", function() { tab.document.body.innerHTML = "<H1>HelloWorld</H1>"; });
 }
 
 /**
@@ -813,12 +818,12 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
         dump("\nHandle namelist\n");
         if (handler.handleNameList) {
             dump("Can handle namelist");
-            handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
+            return handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
         }
     }
     else if (datatype == "Map") {
         if (handler.handleMap) {
-            handler.handleMap(
+            return handler.handleMap(
                     broadcastData.getSpecies(),
                     broadcastData.getName(),
                     FG_objectToJavaHashMap(data));
@@ -826,31 +831,31 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     }
     else if (datatype == "Network") {
             if (handler.handleNetwork) {
-                handler.handleNetwork(broadcastData.getSpecies(), broadcastData.getData());
+                return handler.handleNetwork(broadcastData.getSpecies(), broadcastData.getData());
             }
             // if target doesn't take a network, use node names as a name list
             else if (handler.handleNameList) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
-                    handler.handleNameList(broadcastData.getSpecies(), names);
+                    return handler.handleNameList(broadcastData.getSpecies(), names);
             }
     }
     else if (datatype == "DataMatrix") {
             if (handler.handleMatrix) {
-                handler.handleMatrix(broadcastData);
+                return handler.handleMatrix(broadcastData);
             }
             // if target doesn't take a matrix, use row names as a name list
             else if (handler.handleNameList) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
-                    handler.handleNameList(broadcastData.getSpecies(), names);
+                    return handler.handleNameList(broadcastData.getSpecies(), names);
             }
     }
     else if (datatype == "Cluster") {
             dump("\nHandle cluster\n");
             if (handler.handleCluster) {
                 dump("STARTING Handle cluster\n");
-                handler.handleCluster(
+                return handler.handleCluster(
                         broadcastData.getSpecies(),
                         broadcastData.getName(),
                         broadcastData.rowNames,
@@ -860,7 +865,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             else if (handler.handleNameList) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
-                    handler.handleNameList(broadcastData.getSpecies(), names);
+                    return handler.handleNameList(broadcastData.getSpecies(), names);
             }
             dump("Cluster handled.");
     }
@@ -961,6 +966,7 @@ function FG_connectOrUpdate() {
  */
 function FG_connectToGaggle(initializingFiregoose) {
     try {
+        dump("\n=========>>>Connecting to Gaggle....\n");
         if (FG_isConnectedToGaggle()) {
             // don't reconnect if already connected
             FG_trace("connectToGaggle: already connected to Gaggle");
@@ -977,8 +983,10 @@ function FG_connectToGaggle(initializingFiregoose) {
                 // user clicks "Connect to Gaggle" always use the autostart
                 // behavior.
                 if (initializingFiregoose && !FG_getAutoStartBoss()) {
+                    dump("\nCalling connectToGaggleIfAvaiable\n");
                     goose.connectToGaggleIfAvailable();
                 } else {
+                    dump("\nCalling connectToGaggle\n");
                     goose.connectToGaggle();
                 }
 
@@ -990,6 +998,8 @@ function FG_connectToGaggle(initializingFiregoose) {
                     throw new Error("Failed to connect to the Gaggle");
                 }
             }
+            else
+                dump("\nGoose is not ready!!\n");
         }
     } catch (e) {
         FG_trace(e);
@@ -1185,9 +1195,9 @@ function FG_pollGoose() {
         {
             var gaggleWorkflowData = new FG_GaggleWorkflowDataFromGoose();
             gaggleWorkflowData.setRequestID(requestID);
-            dump("Setting requestID...");
+            dump("\nSetting requestID..." + requestID);
             FG_WorkflowDataReceived(gaggleWorkflowData);
-            goose.removeWorkflowRequest(requestID);
+            //goose.removeWorkflowRequest(requestID);
         }
 
         // we want to check if there's new data from the Gaggle,
