@@ -31,6 +31,7 @@ var FG_websiteHandlers = {};
 var FG_default = {species : "unknown", mode : "default"};
 var FG_isConnected = false;
 
+
 // these keep track of the last value this window has seen
 // from the goose java class. We poll the goose asking if
 // we have new updates (either received a broadcast or got
@@ -40,7 +41,7 @@ var FG_isConnected = false;
 // @see the function FG_pollGoose().
 var FG_previousNewDataSignalValue = 0;
 var FG_previousTargetUpdateSignalValue = 0;
-
+var FG_java;
 
 /**
  * I want to pass this object to java and have it called from
@@ -134,15 +135,18 @@ var FG_pageListener = {
 
 	onPageLoad: function(aEvent) {
 		if (aEvent.originalTarget.nodeName == "#document") {
-      // Re-establish connection to Java
-      FG_trace('establishing connection to Java plugin...');
-      var appletRef = document.getElementById('fireGooseApplet');
-      window.java = appletRef.Packages.java;
-      java = window.java;
-      FG_trace('set java variable into global namespace to re-establish compatibility...');
-      FG_trace('initializing Java Firegoose loader...');
-      javaFiregooseLoader.init();
-      FG_trace('Java Firegoose loaded');
+          // Re-establish connection to Java
+            if (FG_java != null)
+            {
+                  FG_trace('establishing connection to Java plugin...');
+                  var appletRef = document.getElementById('fireGooseApplet');
+                  window.java = appletRef.Packages.java;
+                  FG_java = window.java;
+                  FG_trace('set java variable into global namespace to re-establish compatibility...');
+                  FG_trace('initializing Java Firegoose loader...');
+                  javaFiregooseLoader.init();
+                  FG_trace('Java Firegoose loaded');
+            }
 
 			dump("on page load event\n");
 			var doc = aEvent.originalTarget;
