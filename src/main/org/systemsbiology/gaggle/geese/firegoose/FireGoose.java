@@ -425,7 +425,22 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         return this.workflowManager.CompleteWorkflowAction(boss, requestID);
     }
 
-
+    public boolean AllDataCommittedForRequest(String requestID)
+    {
+        if (requestID != null)
+        {
+            System.out.println("Verifying all data committed for request " + requestID);
+            WorkflowAction request = this.workflowManager.getWorkflowAction(requestID);
+            int submitted = this.workflowManager.dataSubmittedForSession(requestID);
+            int targets = 0;
+            if (request != null && request.getTargets() != null)
+            {
+                targets = request.getTargets().length;
+            }
+            return submitted == targets;
+        }
+        return false;
+    }
 
     public void update(String[] gooseNames) throws RemoteException {
         this.activeGooseNames = gooseNames;

@@ -250,7 +250,10 @@
     </toolbarbutton>
 
       <toolbarbutton id="fg_executeNextWorkflowButton" command="fgcmd_executeNextWorkflow"/>
-      <label value="" id="fg_nextcomponents" />
+      <menulist id="fg_nextcomponents" disabled="false" width="120" maxheight="28" minheight="28"
+                tooltiptext="Select the next workflow component to broadcast">
+          <menupopup id="fg_nextcomponentPopup"></menupopup>
+      </menulist>
       <label value="Gaggle Data:" control="fg_broadcastChooser"/>
       <image src="chrome://firegoose/skin/data.png" />
       <menulist id="fg_broadcastChooser" disabled="false" width="360" maxheight="28" minheight="28"

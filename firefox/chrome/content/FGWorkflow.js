@@ -70,28 +70,43 @@ function FG_setWorkflowUI(action)
     {
         dump("\nSetting workflow UI\n");
         var targets = action.getTargets();
-        var pnl = document.getElementById("fg_nextcomponents");
         if (targets != undefined && targets != null)
         {
+            var popup = document.getElementById("fg_nextcomponentPopup");
+            var chooser = document.getElementById("fg_nextcomponents");
+            for (var i=popup.childNodes.length - 1; i>=0; i--) {
+                popup.removeChild(popup.childNodes.item(i));
+            }
+
             var nextcomponents = "";
             for (var i = 0; i < targets.length; i++)
             {
                 var component = targets[i];
                 dump("Target component name: " + component.getName());
-                nextcomponents += (component.getName() + " ");
+                var newMenuItem = document.createElement("menuitem");
+                newMenuItem.setAttribute("label", component.getName());
+                newMenuItem.setAttribute("tooltiptext", component.getName());
+                newMenuItem.setAttribute("value", i);
+                popup.appendChild(newMenuItem);
+                //nextcomponents += (component.getName() + " ");
+            }
+            if (popup.childNodes.length > 0) {
+               chooser.selectedIndex = 0;
             }
             dump("\n" + nextcomponents + "\n");
-            pnl.value = nextcomponents;
+            //pnl.value = nextcomponents;
         }
     }
     else
     {
-        var pnl = document.getElementById("fg_nextcomponents");
-        pnl.value = "";
+        var popup = document.getElementById("fg_nextcomponentPopup");
+        for (var i=popup.childNodes.length - 1; i>=0; i--) {
+            popup.removeChild(popup.childNodes.item(i));
+        }
     }
 }
 
-function FG_GetDataForTargets(gaggleWorkflowData)
+function FG_GetDataForTargets(gaggleWorkflowData, gooseindex)
 {
     // Parse the web page using web handlers and obtain data for each target component
     // return a list of GaggleData
@@ -106,7 +121,7 @@ function FG_GetDataForTargets(gaggleWorkflowData)
             broadcastData.asynchronouslyFetchData(
                     function() {
                         data.push(broadcastData);
-                        FG_processWorkflowResponseData(data, gaggleWorkflowData);
+                        FG_processWorkflowResponseData(data, gaggleWorkflowData, gooseindex);
                     });
         }
         else {
@@ -129,26 +144,32 @@ function FG_executeNextWorkflow(sessionID)
     var gaggleWorkflowData = FG_findWorkflowData(FG_Current_Tab.value);
     if (gaggleWorkflowData)
     {
-        var data = FG_GetDataForTargets(gaggleWorkflowData);
-        FG_processWorkflowResponseData(data, gaggleWorkflowData);
+        var popup = document.getElementById("fg_nextcomponentPopup");
+        var chooser = document.getElementById("fg_nextcomponents");
+        dump("\nSelected index: " + chooser.selectedIndex + "\n");
+        var gooseindex = chooser.selectedItem.getAttribute("value");
+        dump("Selected next component: " + gooseindex);
+        var data = FG_GetDataForTargets(gaggleWorkflowData, gooseindex);
+        FG_processWorkflowResponseData(data, gaggleWorkflowData, gooseindex);
     }
 }
 
-function FG_processWorkflowResponseData(data, gaggleWorkflowData)
+function FG_processWorkflowResponseData(data, gaggleWorkflowData, gooseindex)
 {
-    if (data != null)// && data.length > 0)
+    if (data != null && data.length > 0)
     {
         var goose = javaFiregooseLoader.getGoose();
         var action = gaggleWorkflowData.getWorkflowAction();
         if (goose != null && action != null && action.getTargets() != null)
         {
             dump("\nAbout to submit " + action.getTargets().length + " data to the boss\n");
-            for (var i = 0; i < action.getTargets().length; i++)
+
+            //for (var i = 0; i < action.getTargets().length; i++)
             {
                 // For now the data is replicated to each targets
                 // TODO: later we should support sending different data to the targets
-                var broadcastData = data[i];
-                dump("\nBroadcast data type: " + broadcastData.getType() + "\n");
+                var broadcastData = data[0];
+                dump("\nSubmit data type: " + broadcastData.getType() + " for Goose " + gooseindex + "\n");
                 if (broadcastData.getType() == "NameList") {
                     //var javaArray = javaFiregooseLoader.toJavaStringArray(broadcastData.getData());
                     //if (javaArray != null && javaArray.length > 0)
@@ -156,7 +177,7 @@ function FG_processWorkflowResponseData(data, gaggleWorkflowData)
 
                     var delimitedString = javaFiregooseLoader.jsStringArrayToDelimitedString(broadcastData.getData(), "!");
                     goose.submitNameList(gaggleWorkflowData.getRequestID(),
-                                         i,
+                                         parseInt(gooseindex),
                                          broadcastData.getName(),
                                          broadcastData.getSpecies(),
                                          //broadcastData.getData()
@@ -167,7 +188,7 @@ function FG_processWorkflowResponseData(data, gaggleWorkflowData)
                 else if (broadcastData.getType() == "Map") {
                     goose.submitMap(
                             gaggleWorkflowData.getRequestID(),
-                            i,
+                            parseInt(gooseindex),
                             broadcastData.getSpecies(),
                             broadcastData.getName(),
                             FG_objectToJavaHashMap(broadcastData.getData())
@@ -182,7 +203,7 @@ function FG_processWorkflowResponseData(data, gaggleWorkflowData)
                             dump("Network retrieved");
                             // TODO is this necessary? apply defaulting to species
                             network.setSpecies(broadcastData.getSpecies());
-                            goose.submitNetwork(gaggleWorkflowData.getRequestID(), i, network);
+                            goose.submitNetwork(gaggleWorkflowData.getRequestID(), parseInt(gooseindex), network);
                         }
                 }
                 else if (broadcastData.getType() == "DataMatrix") {
@@ -190,12 +211,12 @@ function FG_processWorkflowResponseData(data, gaggleWorkflowData)
                         var matrix = broadcastData.getData();
                         // TODO is this necessary? apply defaulting to species
                         matrix.setSpecies(broadcastData.getSpecies());
-                        goose.submitDataMatrix(gaggleWorkflowData.getRequestID(), i, matrix);
+                        goose.submitDataMatrix(gaggleWorkflowData.getRequestID(), parseInt(gooseindex), matrix);
                 }
                 else if (broadcastData.getType() == "Cluster") {
                         goose.submitCluster(
                                 gaggleWorkflowData.getRequestID(),
-                                i,
+                                parseInt(gooseindex),
                                 broadcastData.getSpecies(),
                                 broadcastData.getName(),
                                 broadcastData.getData().rowNames,
@@ -206,14 +227,31 @@ function FG_processWorkflowResponseData(data, gaggleWorkflowData)
                     FG_trace("Error in FG_dispatchBroadcastToGoose(broadcastData, target): Unknown data type: \"" + broadcastData.getType() + "\"");
                 }
             }
-            dump("\n>>>>>Submitting data for " + gaggleWorkflowData.getRequestID());
-            if (goose.CompleteWorkflowAction(gaggleWorkflowData.getRequestID()))
-            {
-                dump("\nSuccessfully submitted data\n");
-                FG_setWorkflowUI(null);
+
+            // diable the item from the nextcomponent dropdown
+            var popup = document.getElementById("fg_nextcomponentPopup");
+            var chooser = document.getElementById("fg_nextcomponents");
+            var component = action.getTargets()[parseInt(gooseindex)];
+            dump("\nUpdate dropdown for " + component.getName());
+            for (var i=popup.childNodes.length - 1; i>=0; i--) {
+                if (i == parseInt(gooseindex))
+                {
+                    popup.childNodes[i].setAttribute("label", (component.getName() + "(data committed)"));
+                    break;
+                }
             }
-            else
-                dump("\nFailed to submit data!!\n")
+
+            if (goose.AllDataCommittedForRequest(gaggleWorkflowData.getRequestID()))
+            {
+                dump("\n>>>>>Submitting data for " + gaggleWorkflowData.getRequestID());
+                if (goose.CompleteWorkflowAction(gaggleWorkflowData.getRequestID()))
+                {
+                    dump("\nSuccessfully submitted data\n");
+                    FG_setWorkflowUI(null);
+                }
+                else
+                    dump("\nFailed to submit data!!\n");
+            }
         }
     }
 }
