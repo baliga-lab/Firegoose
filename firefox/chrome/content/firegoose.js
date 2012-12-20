@@ -115,7 +115,6 @@ var FG_pageListener = {
 
 	onTabSelect: function(aEvent) {
 		this.scanPage(window.content.document);
-
 		// Update workflow UI
         var tabvalue = aEvent.target.value;
         //dump("\nTab " + tabvalue + " selected\n");
@@ -152,7 +151,9 @@ var FG_pageListener = {
                 // Re-establish connection to Java
                 FG_trace('establishing connection to Java plugin...');
                 var appletRef = document.getElementById('fireGooseApplet');
+                FG_trace("Got appletRef for firegoose");
                 window.java = appletRef.Packages.java;
+                FG_trace("window.java");
                 FG_java = window.java;
                 FG_trace('set java variable into global namespace to re-establish compatibility...');
                 FG_trace('initializing Java Firegoose loader...');
@@ -816,15 +817,25 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     dump("\ntarget: " + target);
     dump("\nData: " + broadcastData.getData());
 
+    var goose = javaFiregooseLoader.getGoose();
+    var url = null;
+    var browser = gBrowser.selectedBrowser;
+    url = browser.currentURI.spec;
+    dump("\nCurrent URL: " + url);
+
     if (datatype == "NameList") {
         dump("\nHandle namelist\n");
         if (handler.handleNameList) {
             dump("Can handle namelist");
+            if (goose != null)
+                goose.recordWorkflow(url, target, "{\"datatype\":\"Namelist\"}");
             return handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
         }
     }
     else if (datatype == "Map") {
         if (handler.handleMap) {
+            if (goose != null)
+                goose.recordWorkflow(url, target, "{\"datatype\":\"Map\"}");
             return handler.handleMap(
                     broadcastData.getSpecies(),
                     broadcastData.getName(),
@@ -833,30 +844,44 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     }
     else if (datatype == "Network") {
             if (handler.handleNetwork) {
+                if (goose != null)
+                    goose.recordWorkflow(url, target, "{\"datatype\":\"Network\"}");
                 return handler.handleNetwork(broadcastData.getSpecies(), broadcastData.getData());
             }
             // if target doesn't take a network, use node names as a name list
             else if (handler.handleNameList) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
+                {
+                    if (goose != null)
+                        goose.recordWorkflow(url, target, "{\"datatype\":\"Namelist\"}");
                     return handler.handleNameList(broadcastData.getSpecies(), names);
+                }
             }
     }
     else if (datatype == "DataMatrix") {
             if (handler.handleMatrix) {
+                if (goose != null)
+                    goose.recordWorkflow(url, target, "{\"datatype\":\"Matrix\"}");
                 return handler.handleMatrix(broadcastData);
             }
             // if target doesn't take a matrix, use row names as a name list
             else if (handler.handleNameList) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
+                {
+                    if (goose != null)
+                        goose.recordWorkflow(url, target, "{\"datatype\":\"Namelist\"}");
                     return handler.handleNameList(broadcastData.getSpecies(), names);
+                }
             }
     }
     else if (datatype == "Cluster") {
             dump("\nHandle cluster\n");
             if (handler.handleCluster) {
                 dump("STARTING Handle cluster\n");
+                if (goose != null)
+                    goose.recordWorkflow(url, target, "{\"datatype\":\"Cluster\"}");
                 return handler.handleCluster(
                         broadcastData.getSpecies(),
                         broadcastData.getName(),
@@ -867,7 +892,11 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             else if (handler.handleNameList) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
+                {
+                    if (goose != null)
+                        goose.recordWorkflow(url, target, "{\"datatype\":\"Namelist\"}");
                     return handler.handleNameList(broadcastData.getSpecies(), names);
+                }
             }
             dump("Cluster handled.");
     }

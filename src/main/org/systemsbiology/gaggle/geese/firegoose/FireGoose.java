@@ -442,6 +442,48 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         return false;
     }
 
+    /**
+     * Record the broadcast to web handlers (e.g. DAVID, EGRIN, etc)
+     * @param sourceUrl: the url of the current tab
+     * @param subaction: the name of the web handler
+     * @param jsonData
+     */
+    public void recordWorkflow(String sourceUrl, String subaction, String jsonData)
+    {
+        if (boss != null && (boss instanceof Boss3))
+        {
+            try
+            {
+                System.out.println("Recording workflow from " + this.gooseName + " to " + subaction + " data: " + jsonData);
+                Boss3 boss3 = (Boss3)boss;
+                JSONObject obj = JSONObject.fromObject(jsonData);
+                HashMap<String, String> sourceparams = new HashMap<String, String>();
+                if (sourceUrl != null)
+                {
+                    System.out.println("Data uri: " + sourceUrl);
+                    sourceparams.put(JSONConstants.WORKFLOW_COMPONENT_DATAURI, sourceUrl);
+                }
+                HashMap<String, String> targetparams = new HashMap<String, String>();
+                if (subaction != null)
+                {
+                    System.out.println("Subaction: " + subaction);
+                    targetparams.put(JSONConstants.WORKFLOW_COMPONENT_SUBACTION, subaction);
+                }
+                HashMap<String, String> edgeparams = new HashMap<String, String>();
+                for (Object key: obj.keySet())
+                {
+                    edgeparams.put((String)key, (String)obj.get(key));
+                }
+
+                boss3.recordAction(this.gooseName, this.gooseName, "", -1, sourceparams, targetparams, edgeparams);
+            }
+            catch (Exception e)
+            {
+                System.out.println("Failed to record: " + e.getMessage());
+            }
+        }
+    }
+
     public void update(String[] gooseNames) throws RemoteException {
         this.activeGooseNames = gooseNames;
         this.hasTargetUpdateSignal.increment();
