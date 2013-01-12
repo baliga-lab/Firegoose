@@ -99,6 +99,7 @@ FG_Metlin.prototype.handleNameListDammit = function(species, names) {
 
 	var newTab = getBrowser().addTab(url);
 	getBrowser().selectedTab = newTab;
+	FG_Workflow_InProgress = false;
 	return newTab;
 }
 
@@ -134,6 +135,7 @@ FG_Metlin.prototype.onPageLoad = function(aEvent, names) {
 		var doc = window.content.document;
 		this.insertNamelistIntoPasteBox(doc, names);
 	}
+	FG_Workflow_InProgress = false;
 }
 
 

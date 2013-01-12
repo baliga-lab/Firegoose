@@ -484,6 +484,53 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         }
     }
 
+    public void saveWorkflowData(String requestId, String componentname, String url)
+    {
+        System.out.println("Save workflow data for " + requestId + " " + componentname + " " + url);
+        if (boss instanceof Boss3)
+        {
+            WorkflowAction workflowAction = this.workflowManager.getWorkflowAction(requestId);
+            if (workflowAction != null)
+            {
+                System.out.println("Obtained workflowaction " + workflowAction.getWorkflowID());
+                ArrayList<Single> paramList = new ArrayList<Single>();
+                Single data = new Single("workflowid", workflowAction.getWorkflowID());
+                paramList.add(data);
+                data = new Single("componentid", workflowAction.getComponentID());
+                paramList.add(data);
+                data = new Single("component-name", componentname);
+                paramList.add(data);
+                data = new Single("type", new String("url"));
+                paramList.add(data);
+                data = new Single("url", url);
+                paramList.add(data);
+                Tuple tuple = new Tuple("Cytoscape Report Data", paramList);
+                WorkflowData wfdata = new WorkflowData(tuple);
+                GaggleData[] gdata = new GaggleData[1];
+                gdata[0] = wfdata;
+                WorkflowAction reportaction = new WorkflowAction(workflowAction.getWorkflowID(),
+                        workflowAction.getSessionID(),
+                        workflowAction.getComponentID(),
+                        WorkflowAction.ActionType.Request,
+                        workflowAction.getSource(),
+                        null,
+                        WorkflowAction.Options.WorkflowReportData.getValue(),
+                        gdata
+                );
+
+                System.out.println("Sending report workflowaction to boss...");
+                try
+                {
+                    ((Boss3)boss).handleWorkflowAction(reportaction);
+                }
+                catch (Exception e)
+                {
+                    System.out.println("Failed to send report to boss: " + e.getMessage());
+                }
+            }
+        }
+    }
+
     public void update(String[] gooseNames) throws RemoteException {
         this.activeGooseNames = gooseNames;
         this.hasTargetUpdateSignal.increment();

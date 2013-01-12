@@ -1216,8 +1216,41 @@ function FG_pollGoose() {
         FG_isConnected = connected;
     }
 
-    if (connected) {
+    //dump("FG_Workflow_InProgress: " + FG_Workflow_InProgress);
+    if (connected && !FG_Workflow_InProgress) {
         var goose = javaFiregooseLoader.getGoose();
+        if (FG_Current_GaggleData != null && FG_Current_Tab != null)
+        {
+            try
+            {
+                // We just processed some workflow data, we need to report to the server
+                if (FG_Current_GaggleData.getType() == "WorkflowData")
+                {
+                    // This is a URL
+                    var data = (FG_Current_GaggleData.getData())[0];
+                    dump("\nSending workflow data " + data + "to server\n");
+                    // Pass the url to the goose, which will pass it to the boss, which will pass it to the server
+                    goose.saveWorkflowData(FG_Current_GaggleData.getRequestID(), "Firegoose", data);
+                }
+                else
+                {
+                    // Pass the url to the goose, which will pass it to the boss, which will pass it to the server
+                    var browser = gBrowser.getBrowserForTab(FG_Current_Tab);
+                    var uri = browser.currentURI.spec;
+                    if (FG_Current_WebHandlerReportUrl != null)
+                        uri = FG_Current_WebHandlerReportUrl;
+                    dump("\nurl to be saved as report: " + uri + "\n");
+                    componentname = "Firegoose " + FG_Current_GaggleData.getSubAction();
+                    goose.saveWorkflowData(FG_Current_GaggleData.getRequestID(), componentname, uri);
+                }
+                FG_Current_GaggleData = null;
+                FG_Current_WebHandlerReportUrl = null;
+            }
+            catch(e)
+            {
+                dump("\nFailed to send workflow data: " + e.message +"\n");
+            }
+        }
 
         // Process workflow requests
         var requestID = goose.getWorkflowRequest();
@@ -1225,9 +1258,13 @@ function FG_pollGoose() {
         if (requestID != undefined && requestID != null)
         {
             var gaggleWorkflowData = new FG_GaggleWorkflowDataFromGoose();
-            gaggleWorkflowData.setRequestID(requestID);
-            dump("\nSetting requestID..." + requestID);
-            FG_WorkflowDataReceived(gaggleWorkflowData);
+            if (gaggleWorkflowData != null)
+            {
+                FG_Current_GaggleData = gaggleWorkflowData;
+                gaggleWorkflowData.setRequestID(requestID);
+                dump("\nSetting requestID..." + requestID);
+                FG_WorkflowDataReceived(gaggleWorkflowData, goose);
+            }
             //goose.removeWorkflowRequest(requestID);
         }
 

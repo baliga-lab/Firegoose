@@ -81,6 +81,7 @@ FG_pipeGoose.prototype.handleNameList = function(species, names) {
 				gBrowser.tabContainer.selectedIndex = i;
 				var goose = browser.contentWindow.wrappedJSObject.goose;
 				goose.handleNameList(species, names);
+				FG_Workflow_InProgress = false;
 				found = true;
 				break;
 			}
@@ -112,12 +113,14 @@ FG_pipeGoose.prototype.handleNameList = function(species, names) {
 				try {
 					goose.handleNameList(this.species, this.names);
 					clearInterval(this.timerId);
+					FG_Workflow_InProgress = false;
 				} catch(e) {
 					FG_trace("Error in page's goose.handleNameList(...): " + e);
 				}
 			}
 			else if (this.timerCount >= 10) {
 				clearInterval(this.timerId);
+				FG_Workflow_InProgress = false;
 			}
 		}
 

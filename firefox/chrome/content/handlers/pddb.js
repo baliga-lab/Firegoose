@@ -36,7 +36,7 @@ FG_addWebsiteHandler("Prion Disease Database (PDDB)", {
 	    if ( names.length < 1 )
 	    {
 	       alert( "No identifiers have been submitted to the Prion Disease Database. Please send at least one identifer to query the database." );	
-	       
+	       FG_Workflow_InProgress = false;
 	       return null;
 	    }
 	    
@@ -54,6 +54,7 @@ FG_addWebsiteHandler("Prion Disease Database (PDDB)", {
 	      
 	      if ( !speciesMm )
 	      {
+	        FG_Workflow_InProgress = false;
 	        return null;
 	      }	      
 	    }
@@ -69,6 +70,7 @@ FG_addWebsiteHandler("Prion Disease Database (PDDB)", {
 
 		var newTab = getBrowser().addTab(url);
 		getBrowser().selectedTab = newTab;
+		FG_Workflow_InProgress = false;
 		return newTab;
 	}
 });

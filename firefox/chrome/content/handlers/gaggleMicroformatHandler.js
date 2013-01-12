@@ -56,6 +56,7 @@ FG_GaggleMicroformatHandler.prototype.getPageData = function(doc) {
  */
 FG_GaggleMicroformatHandler.prototype.handleNameList = function(species, names) {
 	alert("Gaggle microformat handler got namelist(" + names.length + ") species=" + species + ".");
+	FG_Workflow_InProgress = false;
 }
 
 

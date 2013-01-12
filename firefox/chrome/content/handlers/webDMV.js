@@ -111,6 +111,7 @@ FG_webDmvHandler.handleNameList = function(species, names) {
 	    var dmvTabs = getDmvTabs();
 	    if (dmvTabs.length == 0) {
 	        alert("You have no open WebDMVs. Launch a WebDMV first in order to broadcast to it.\n (WebDMV must be in the same group of tabs as the currently open page.)");
+	        FG_Workflow_InProgress = false;
 	        return;
 	    }
 		//var doc = getBrowser().selectedBrowser.contentDocument;
@@ -140,10 +141,11 @@ FG_webDmvHandler.handleNameList = function(species, names) {
 		    }
             
 		}
-		
+		FG_Workflow_InProgress = false;
 	}
 	catch (e) {
 		FG_trace("Error putting stuff on page: " + e);
+		FG_Workflow_InProgress = false;
 	}
 	
 }

@@ -1,5 +1,8 @@
 var FG_Current_WorkflowActions = new Array();
 var FG_Current_Tab;
+var FG_Workflow_InProgress = false;
+var FG_Current_GaggleData = null;
+var FG_Current_WebHandlerReportUrl = null; // A url of a web handler (e.g. EMBL String) to generate the report data
 
 function FG_findWorkflowData(requestID)
 {
@@ -20,13 +23,16 @@ function FG_findWorkflowData(requestID)
     return null;
 }
 
-function FG_WorkflowDataReceived(gaggleData)
+function FG_WorkflowDataReceived(gaggleData, goose)
 {
     try
     {
         dump("Workflow data received....\n");
         var action = gaggleData.getWorkflowAction();
-
+        // We need to process webhandlers in serial because some webhandlers (such as EMBL String)
+        // needs focus to post data to the web page. Execution in parallel of multiple subactions
+        // will cause the tab to lose focus and thus lose data.
+        FG_Workflow_InProgress = true;
         // set the UI
         FG_setWorkflowUI(action);
 
@@ -38,26 +44,47 @@ function FG_WorkflowDataReceived(gaggleData)
             var data = (gaggleData.getData())[0];
             newTab = getBrowser().addTab(data);
             getBrowser().selectedTab = newTab;
+            FG_Current_WorkflowActions.push(gaggleData);
+            FG_Workflow_InProgress = false;
+            if (newTab != null)
+            {
+                dump("Setting tab value: " + gaggleData.getRequestID());
+                newTab.value = gaggleData.getRequestID();
+                FG_Current_Tab = newTab;
+                FG_setWorkflowUI(action);
+            }
+
         }
         else
         {
             // This is a WorkflowAction (Contains gaggleData such as Network, Cluster, Namelist, etc and a subaction)
             dump("SubAction: " + gaggleData.getSubAction() + "\n");
-            newTab = FG_dispatchBroadcastToWebsite(gaggleData, gaggleData.getSubAction());
-        }
+            // We get a string of concatenated subactions delimited by ';'
+            var subactions = gaggleData.getSubAction();
+            if (subactions != null && subactions.length > 0)
+            {
+                FG_Current_WorkflowActions.push(gaggleData);
+                var actions = subactions.split(";");
+                for (var i = 0; i < actions.length; i++)
+                {
+                    dump("Subaction: " + actions[i]);
+                    newTab = FG_dispatchBroadcastToWebsite(gaggleData, actions[i]);
+                    if (newTab != null)
+                    {
+                        dump("Setting tab value: " + gaggleData.getRequestID());
 
-        if (newTab != null)
-        {
-            dump("Setting tab value: " + gaggleData.getRequestID());
-            newTab.value = gaggleData.getRequestID();
-            FG_Current_Tab = newTab;
-            FG_Current_WorkflowActions.push(gaggleData);
-            FG_setWorkflowUI(action);
+                        newTab.value = gaggleData.getRequestID();
+                        FG_Current_Tab = newTab;
+                        FG_setWorkflowUI(action);
+                    }
+                }
+            }
         }
     }
     catch(e)
     {
         dump("Failed to process workflow data: " + e.message);
+        FG_Workflow_InProgress = false;
     }
 
     // var action = gaggleData.getWorkflowAction();
@@ -74,6 +101,7 @@ function FG_setWorkflowUI(action)
         {
             var popup = document.getElementById("fg_nextcomponentPopup");
             var chooser = document.getElementById("fg_nextcomponents");
+            dump("\nClean up" + popup.childNodes.length + " components\n");
             for (var i=popup.childNodes.length - 1; i>=0; i--) {
                 popup.removeChild(popup.childNodes.item(i));
             }
@@ -100,9 +128,12 @@ function FG_setWorkflowUI(action)
     else
     {
         var popup = document.getElementById("fg_nextcomponentPopup");
-        for (var i=popup.childNodes.length - 1; i>=0; i--) {
-            popup.removeChild(popup.childNodes.item(i));
+        var chooser = document.getElementById("fg_nextcomponents");
+        dump("\nAfter committing data clean up" + popup.childNodes.length + " components\n");
+        for (var j=popup.childNodes.length - 1; j>=0; j--) {
+            popup.removeChild(popup.childNodes.item(j));
         }
+        chooser.selectedIndex = -1;
     }
 }
 

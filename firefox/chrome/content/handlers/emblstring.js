@@ -108,6 +108,10 @@ var FG_emblString = {
 					}
 				}
 			}
+			FG_Current_WebHandlerReportUrl = "http://string-db.org/api/image/network?identifier=";   //dvu3032;dvu3033
+			for (var j=1; j<names.length; j++)
+			     FG_Current_WebHandlerReportUrl += (names[j] + ";");
+			FG_Workflow_InProgress = false;
 		};
 		return onLoadFormFiller;
 	},

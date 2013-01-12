@@ -112,6 +112,7 @@ FG_virtualPlantHandler._getTitle = function(doc) {
  */
 FG_virtualPlantHandler.handleNameList = function(species, names) {
 	alert("VirtualPlant handler got namelist(" + names.length + ") species=" + species + ".");
+	FG_Workflow_InProgress = false;
 }
 
 

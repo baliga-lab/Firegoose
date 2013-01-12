@@ -42,6 +42,7 @@ FG_OntDiscEnvHandler.handleCluster= function(species, name, genes, description) 
 	// open the URL in a new tab
 	var newTab = getBrowser().addTab(url);
 	getBrowser().selectedTab = newTab;
+	FG_Workflow_InProgress = false;
 	return newTab;
 }
 
@@ -58,6 +59,7 @@ FG_OntDiscEnvHandler.handleNameList = function(species, genes) {
       if( name!="" && description=="" ) description=name;
    } catch(anything) {}
    FG_OntDiscEnvHandler.handleCluster(species, name, genes, description);
+   FG_Workflow_InProgress = false;
 }
 
 FG_OntDiscEnvHandler.handleNetwork = FG_OntDiscEnvHandler.handleNameList;

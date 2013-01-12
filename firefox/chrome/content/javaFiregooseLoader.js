@@ -102,6 +102,7 @@ var javaFiregooseLoader = {
 	},
 
 	toJavaStringArray: function(a) {
+	    dump("\nLength of string array: " + a.length + "\n");
 		var javaArray = java.lang.reflect.Array.newInstance(this.stringClass, a.length);
 		for (var i = 0; i < a.length; i++) {
 			var element = a[i];

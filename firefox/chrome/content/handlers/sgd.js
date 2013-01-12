@@ -171,8 +171,9 @@ FG_sgd.prototype.handleNameList = function(species, names) {
 				var newTab = getBrowser().addTab(url);
 				getBrowser().selectedTab = newTab;
 				tabs.push(newTab);
-			}		
+			}
 		}
+		FG_Workflow_InProgress = false;
 	} else {
 		/**
 		 * Broadcast namelist to SGD Term Finder or Go Slim Mapper.
@@ -236,6 +237,7 @@ FG_sgd.createOnloadFormFiller = function(species, names) {
 				loci_text_area.value=queryString
 			}
 		}
+		FG_Workflow_InProgress = false;
 	};
 	return onLoadFormFiller;
 },

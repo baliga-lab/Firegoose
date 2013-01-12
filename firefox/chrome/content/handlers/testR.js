@@ -40,8 +40,10 @@ FG_testR.handleNameList = function(species, names) {
 		if (element)
 		{
 			this.insertNamelistIntoGenesTextArea(doc);
+			FG_Workflow_InProgress = false;
 			return FG_Current_Tab;
 	    }
+	    FG_Workflow_InProgress = false;
 	}
 	else {
 		// open url in a new tab
@@ -72,6 +74,7 @@ FG_testR.onPageLoad = function(testR, aEvent) {
 		var doc = window.content.document;
 		testR.insertNamelistIntoGenesTextArea(doc);
 	}
+	FG_Workflow_InProgress = false;
 }
 
 FG_testR.insertNamelistIntoGenesTextArea = function(doc) {

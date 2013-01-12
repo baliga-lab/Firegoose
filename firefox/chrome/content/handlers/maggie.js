@@ -78,6 +78,7 @@ var FG_maggieHandler = {
 					dump("Maggie data viewer handler couldn't find search_box\n");
 				}
 			}
+			FG_Workflow_InProgress = false;
 		};
 		return onLoadFormFiller;
 	}

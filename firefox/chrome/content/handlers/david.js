@@ -100,6 +100,7 @@ FG_david.onPageLoad = function(david, aEvent) {
 		// a timer and selecting the 'Upload' tab after their
 		// do_onload() has already run.
 		setTimeout("FG_David_selectUploadTab()", 800);
+        FG_Workflow_InProgress = false;
 	}
 }
 

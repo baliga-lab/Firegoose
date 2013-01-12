@@ -277,6 +277,7 @@ FG_kegg.handleNameList = function(species, names) {
 	// open the kegg URL in a new tab
 	var newTab = getBrowser().addTab(url);
 	getBrowser().selectedTab = newTab;
+	FG_Workflow_InProgress = false;
 	return newTab;
 }
 

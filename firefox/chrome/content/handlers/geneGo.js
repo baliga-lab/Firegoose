@@ -160,6 +160,7 @@ GeneGO.prototype.handleNameList = function(species, names) {
 				show("http://portal.genego.com/cgi/regulation/regulation_search.cgi?selected_ids="+translated_names);
 			}
 		}
+		FG_Workflow_InProgress = false;
 	};
 	var url="http://sdee.t1dbase.org/cgi-bin/gaggle_translator.cgi/mode/1/ids/"+names.join(',');
 	FG_trace(url);

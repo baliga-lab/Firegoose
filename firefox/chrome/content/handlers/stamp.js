@@ -118,6 +118,7 @@ FG_stampHandler.createOnloadFormFiller = function(matrix) {
 				FG_trace("STAMP handler: input field not found!");
 			}
 		}
+		FG_Workflow_InProgress = false;
 	};
 	return onLoadFormFiller;
 }

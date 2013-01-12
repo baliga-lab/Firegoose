@@ -53,6 +53,7 @@ FG_MRMAtlas.handleNameList = function(species, names) {
 	if (element)
 	{
 		this.insertNamelistIntoPasteBox(doc);
+		FG_Workflow_InProgress = false;
 		return FG_Current_Tab;
 	}
 	else {
@@ -91,6 +92,7 @@ FG_MRMAtlas.onPageLoad = function(mrmatlas, aEvent) {
 		var doc = window.content.document;
 		mrmatlas.insertNamelistIntoPasteBox(doc);
 	}
+	FG_Workflow_InProgress = false;
 }
 
 /**
