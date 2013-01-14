@@ -31,6 +31,7 @@ var FG_websiteHandlers = {};
 var FG_default = {species : "unknown", mode : "default"};
 var FG_isConnected = false;
 
+
 // these keep track of the last value this window has seen
 // from the goose java class. We poll the goose asking if
 // we have new updates (either received a broadcast or got
