@@ -43,6 +43,7 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
     String[] nameList;
     String size;
     String type = null;
+    String workingDir = null;
     Tuple metadata;
 
     GooseWorkflowManager workflowManager = new GooseWorkflowManager();
@@ -51,9 +52,27 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         System.out.println("created Firegoose instance");
         connector.setAutoStartBoss(true);
         connector.addListener(this);
-        
+        //workingDir = System.getProperty("user.dir");
+
+        // Send the application info to boss
+        reportApplicationInfo();
+
         // this has no effect. Firefox probably doesn't wait for the JVM to shut down properly.
         new GooseShutdownHook(connector);
+    }
+
+    private void reportApplicationInfo()
+    {
+        try
+        {
+            String query = "Exe.Name.ct=Firefox";
+            System.out.println("=====>Query string for process " + query);
+            ((org.systemsbiology.gaggle.core.Boss3)boss).recordAction("Firegoose", null, query, -1, null, null, null);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Failed to record app name " + e.getMessage());
+        }
     }
 
     public String getSpecies() {
@@ -448,13 +467,15 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
      * @param subaction: the name of the web handler
      * @param jsonData
      */
-    public void recordWorkflow(String sourceUrl, String subaction, String jsonData)
+    public void recordWorkflow(String targetGoose, String sourceUrl, String subaction, String jsonData)
     {
         if (boss != null && (boss instanceof Boss3))
         {
             try
             {
-                System.out.println("Recording workflow from " + this.gooseName + " to " + subaction + " data: " + jsonData);
+                if (targetGoose == null)
+                    targetGoose = this.gooseName;
+                System.out.println("Recording workflow from " + this.gooseName + " to " + targetGoose + " " + subaction + " data: " + jsonData);
                 Boss3 boss3 = (Boss3)boss;
                 JSONObject obj = JSONObject.fromObject(jsonData);
                 HashMap<String, String> sourceparams = new HashMap<String, String>();
@@ -475,7 +496,7 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
                     edgeparams.put((String)key, (String)obj.get(key));
                 }
 
-                boss3.recordAction(this.gooseName, this.gooseName, "", -1, sourceparams, targetparams, edgeparams);
+                boss3.recordAction(this.gooseName, targetGoose, "", -1, sourceparams, targetparams, edgeparams);
             }
             catch (Exception e)
             {
@@ -591,6 +612,8 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 	public void setConnected(boolean connected, Boss boss) {
 		if (connected) {
 			this.boss = boss;
+            System.out.println("Connected to boss.");
+            reportApplicationInfo();
 		}
 		else {
 			this.boss = null;
