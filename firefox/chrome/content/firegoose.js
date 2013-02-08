@@ -55,6 +55,91 @@ var FG_firegooseJS = {
 	name: "FG_firegooseJS"
 }
 
+function appletloaded()
+{
+    if (FG_java == undefined)
+    {
+        // Re-establish connection to Java
+        //alert("applet loaded!");
+        FG_trace('appletloaded establishing connection to Java plugin...');
+        var appletRef = document.getElementById('DummyApplet');
+        FG_trace("Got appletRef for firegoose");
+        //alert(appletRef);
+        window.java = appletRef.Packages.java;
+        FG_trace("window.java");
+        FG_java = window.java;
+        FG_trace('set java variable into global namespace to re-establish compatibility...');
+        FG_trace('initializing Java Firegoose loader...');
+        try
+        {
+            javaFiregooseLoader.init();
+            // Try to connect to Gaggle after init
+            FG_connectToGaggle(true);
+            FG_trace('Java Firegoose loaded');
+        }
+        catch(e)
+        {
+            dump("\nFailed to load firegoose: " + e.message);
+        }
+    }
+}
+
+
+// This code generates an applet and inject it into a web page.
+// It worked, however, pointing the applet's archive attribute
+// to the local file where the applet is stored together with
+// the firegoose plugin won't work due to security restrictions.
+// I keep the code anyway for a reference.
+function FG_generateAppletCode(doc, win)
+{
+    if (doc != null && win != null && FG_java == undefined)
+    {
+        dump("\nGetting DummyApplet...\n");
+        var guid = "firegoose@systemsbiology.org";
+        var folderName = "chrome";
+        var fileName = "/DummyApplet.jar";
+        dump("\nGetting appletFile...\n");
+        try
+        {
+            var chromeRegistry =
+                    Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+                        .getService(Components.interfaces.nsIChromeRegistry);
+
+            var uri =
+                Components.classes["@mozilla.org/network/standard-url;1"]
+                    .createInstance(Components.interfaces.nsIURI);
+
+            // convert chrome URLs to paths using what's in the chrome.manifest file
+            uri.spec = "chrome://firegoose/content/";
+
+            var path = chromeRegistry.convertChromeURL(uri);
+            if (typeof(path) == "object") {
+                path = path.spec;
+            }
+            path = path.substring(0, path.indexOf("/chrome/") + 1);
+            dump("\nFiregoose Path: " + path);
+            path += folderName;
+            path += fileName;
+            var fileUri = path;
+            dump("\nApplet file uri: " + fileUri + "\n");
+
+            var app = document.createElement('applet');
+            app.id= 'DummyApplet';
+            app.setAttribute("archive", fileUri);
+            app.setAttribute("code", 'DummyApplet.class');
+            app.width = '0';
+            app.height = '0';
+            doc.getElementsByTagName('body')[0].appendChild(app);
+        }
+        catch (e)
+        {
+            FG_trace("Failed to get DummyApplet: " + e);
+        }
+
+    }
+}
+
+
 
 /**
  * Scans the page for gaggle data when a new page is loaded, a
@@ -135,19 +220,6 @@ var FG_pageListener = {
 
 	onPageLoad: function(aEvent) {
 		if (aEvent.originalTarget.nodeName == "#document") {
-		   if (FG_java == undefined) {
-              // Re-establish connection to Java
-              FG_trace('establishing connection to Java plugin...');
-              var appletRef = document.getElementById('fireGooseApplet');
-              FG_trace("Got appletRef for firegoose");
-              window.java = appletRef.Packages.java;
-              FG_trace("window.java");
-              FG_java = window.java;
-              FG_trace('set java variable into global namespace to re-establish compatibility...');
-              FG_trace('initializing Java Firegoose loader...');
-              javaFiregooseLoader.init();
-              FG_trace('Java Firegoose loaded');
-            }
 			dump("on page load event\n");
 			var doc = aEvent.originalTarget;
             var clearPageData = true;
