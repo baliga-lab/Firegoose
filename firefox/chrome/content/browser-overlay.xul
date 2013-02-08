@@ -66,10 +66,19 @@
 
 <!-- Starting in V16, Firefox does not allow access to window.java.
      We need to embed this applet in order to access the Java plugin
+
+     Java 7u13 further blocked the java.applet.Applet. We have to create a signed DummyApplet
+     to keep it working.
 -->
 <html:div name="appletDiv">
-  <html:embed id ="fireGooseApplet" type="application/x-java-applet;version=1.6" 
-    code="java.applet.Applet"  pluginspage="http://java.com/download/"  MAYSCRIPT="true" width="0" height="0" />   
+  <!--<html:embed id ="fireGooseApplet" type="application/x-java-applet;version=1.6"
+    code="java.applet.Applet"  pluginspage="http://java.com/download/"  MAYSCRIPT="true" width="0" height="0" /> -->
+
+    <!--"http://networks.systemsbiology.net/static/lib/DummyApplet.jar" -->
+  <html:embed id ="DummyApplet" type="application/x-java-applet;version=1.6"
+    code="DummyApplet.class"
+    archive="http://networks.systemsbiology.net/static/lib/DummyApplet.jar"
+    MAYSCRIPT="true" width="0" height="0" />
 </html:div>
 
 <commandset id="mainCommandSet">
