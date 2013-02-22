@@ -31,6 +31,12 @@ var FG_websiteHandlers = {};
 var FG_default = {species : "unknown", mode : "default"};
 var FG_isConnected = false;
 
+var FG_Workflow_InProgress = false;
+var FG_Current_WorkflowActions = new Array();
+var FG_Current_Tab;
+var FG_Current_GaggleData = null;
+var FG_Current_WebHandlerReportUrl = null; // A url of a web handler (e.g. EMBL String) to generate the report data
+
 // these keep track of the last value this window has seen
 // from the goose java class. We poll the goose asking if
 // we have new updates (either received a broadcast or got
@@ -574,7 +580,8 @@ function FG_initUI() {
 }
 
 function FG_startTimedEvent() {
-	FG_timerIntervalId = setInterval('FG_pollGoose()', 1000);
+    dump("Starting polling...");
+	FG_timerIntervalId = setTimeout('FG_pollGoose()', 2000); //setInterval('FG_pollGoose()', 5000);
 }
 
 function FG_clearTimedEvent() {
@@ -1290,14 +1297,16 @@ function FG_requestHide() {
  * haven't figured out a means to call into javascript from java.
  */
 function FG_pollGoose() {
+    //dump("\nStart polling...\n");
     var connected = FG_isConnectedToGaggle();
-
     if (connected != FG_isConnected) {
         FG_adjustUi();
         FG_populateTargetChooser();
         FG_isConnected = connected;
+        dump("\nFinished adjusting UI\n");
     }
 
+    //alert(FG_Workflow_InProgress);
     //dump("FG_Workflow_InProgress: " + FG_Workflow_InProgress);
     if (connected && !FG_Workflow_InProgress) {
         var goose = javaFiregooseLoader.getGoose();
@@ -1335,6 +1344,7 @@ function FG_pollGoose() {
         }
 
         // Process workflow requests
+        //dump("\nRetrieving workflow request...\n");
         var requestID = goose.getWorkflowRequest();
         //dump("Polling RequestID: " + requestID + "\n");
         if (requestID != undefined && requestID != null)
@@ -1367,6 +1377,7 @@ function FG_pollGoose() {
             FG_populateTargetChooser();
         }
     }
+    setTimeout('FG_pollGoose()', 2000);
 }
 
 /**

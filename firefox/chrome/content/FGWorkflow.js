@@ -1,9 +1,3 @@
-var FG_Current_WorkflowActions = new Array();
-var FG_Current_Tab;
-var FG_Workflow_InProgress = false;
-var FG_Current_GaggleData = null;
-var FG_Current_WebHandlerReportUrl = null; // A url of a web handler (e.g. EMBL String) to generate the report data
-
 function FG_findWorkflowData(requestID)
 {
     if (requestID != undefined)
@@ -112,7 +106,7 @@ function FG_setWorkflowUI(action)
                 var component = targets[i];
                 dump("Target component name: " + component.getName());
                 var newMenuItem = document.createElement("menuitem");
-                newMenuItem.setAttribute("label", component.getName());
+                newMenuItem.setAttribute("label", (component.getName() + "-" + component.getWorkflowIndex().toString()));
                 newMenuItem.setAttribute("tooltiptext", component.getName());
                 newMenuItem.setAttribute("value", i);
                 popup.appendChild(newMenuItem);
