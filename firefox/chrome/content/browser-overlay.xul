@@ -153,7 +153,14 @@
            tooltiptext="&firegoose.executeNextWorkflow.tooltip;"
            disabled="false"
            />
-  
+
+  <command id="fgcmd_sendToWorkflow"
+             label="&firegoose.sendToWorkflow.label;"
+             oncommand="FG_sendToWorkflow();"
+             tooltiptext="&firegoose.sendToWorkflow.tooltip;"
+             disabled="false"
+            />
+
   <!-- 
   <command id="fgcmd_broadcastNames"
            label="&firegoose.broadcastNames.label;"
@@ -263,6 +270,7 @@
                 tooltiptext="Select the next workflow component to broadcast">
           <menupopup id="fg_nextcomponentPopup"></menupopup>
       </menulist>
+      <toolbarbutton id="fg_sendToWorkflow" command="fgcmd_sendToWorkflow"/>
       <label value="Gaggle Data:" control="fg_broadcastChooser"/>
       <image src="chrome://firegoose/skin/data.png" />
       <menulist id="fg_broadcastChooser" disabled="false" width="360" maxheight="28" minheight="28"
@@ -280,6 +288,7 @@
         <menupopup id="fg_targetChooserPopup">
         </menupopup>
       </menulist>
+
       <toolbarbutton id="fg_showGooseButton" command="fgcmd_showGoose"/>
       <toolbarbutton id="fg_hideGooseButton" command="fgcmd_hideGoose"/>
       <toolbarbutton id="fg_broadcastButton" command="fgcmd_broadcast"

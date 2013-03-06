@@ -297,6 +297,14 @@ var FG_pageListener = {
             
             try {
     			this.scanPage(doc, clearPageData);
+
+    			// If this is the workflow page, and we are collecting data, then we inject the data
+    			// to the page
+    			if (FG_sendDataToWorkflow)
+    			{
+    			    InjectWorkflowData();
+    			    FG_sendDataToWorkflow = false;
+    			}
             } catch (error) {
                 FG_trace("scanPage in onPageLoad() failed");
                 FG_trace(error);
@@ -1241,6 +1249,8 @@ function FG_adjustUi() {
 function FG_adjustBroadcastButton() {
 
     var targetChooser = document.getElementById("fg_targetChooser");
+    dump("\nUser selected " + targetChooser.selectedIndex);
+
     if (targetChooser.selectedIndex > -1)
         var targetSelected = true;
 
@@ -1258,6 +1268,24 @@ function FG_adjustBroadcastButton() {
     }
 }
 
+//
+function FG_targetChosen()
+{
+    dump("\nBroadcast target picked...\n");
+    var targetChooser = document.getElementById("fg_targetChooser");
+    if (targetChooser.selectedIndex == 1)
+    {
+        // Get all the checked
+        if (!FG_sendDataToWorkflow)
+        {
+            FG_sendDataToWorkflow = true;
+            dump("\nSend to workflow page...\n");
+            FG_workflowDataExtract("", "table");
+        }
+    }
+    else
+        FG_adjustBroadcastButton();
+}
 
 /**
  * ask the currently selected goose to show itself
