@@ -1,4 +1,5 @@
-var FG_workflowPageUrl = "http://localhost:8000/workflow"; //http://networks.systemsbiology.net/workflow";
+//var FG_workflowPageUrl = "http://localhost:8000/workflow";
+var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "wfdataspace";
 var FG_sendDataToWorkflow = false;
 var FG_collectedData = [];
@@ -81,6 +82,7 @@ function InjectWorkflowData()
                 label.className = "dataspacelabel";
                 var checkbox = doc.createElement("input");
                 checkbox.type = "checkbox";
+                checkbox.className = "dataspacecheckbox";
                 checkbox.name = "checkboxCapturedData";
                 label.appendChild(checkbox);
                 var url = FG_collectedData[lindex];
@@ -88,6 +90,10 @@ function InjectWorkflowData()
                 dump("\nurl nodename: " + url.nodeName);
                 var urlclone = url.cloneNode(true);
                 label.appendChild(urlclone);
+                var hoverimage = doc.createElement("img");
+                hoverimage.className = "dataspacehoverimage";
+                hoverimage.src = "http://networks.systemsbiology.net/static/images/list-add.png";
+                //label.appendChild(hoverimage);
                 li.appendChild(label);
                 //datadiv.appendChild(FG_collectedData[lindex]);
              }
@@ -334,20 +340,26 @@ function FG_WorkflowDataReceived(gaggleData, goose)
         var newTab;
         if (gaggleData.getType() == "WorkflowData")
         {
-            // This is a URL
+            // This is a URL, it might be ; delimited
             var data = (gaggleData.getData())[0];
-            newTab = getBrowser().addTab(data);
-            getBrowser().selectedTab = newTab;
+            var actions = data.split(";");
+            for (var i = 0; i < actions.length; i++)
+            {
+                if (actions[i] != null && actions[i] != "NONE" && actions[i].length > 0 )
+                {
+                    newTab = getBrowser().addTab(actions[i]);
+                    getBrowser().selectedTab = newTab;
+                    if (newTab != null)
+                    {
+                        dump("Setting tab value: " + gaggleData.getRequestID());
+                        newTab.value = gaggleData.getRequestID();
+                        FG_Current_Tab = newTab;
+                        FG_setWorkflowUI(action);
+                    }
+                }
+            }
             FG_Current_WorkflowActions.push(gaggleData);
             FG_Workflow_InProgress = false;
-            if (newTab != null)
-            {
-                dump("Setting tab value: " + gaggleData.getRequestID());
-                newTab.value = gaggleData.getRequestID();
-                FG_Current_Tab = newTab;
-                FG_setWorkflowUI(action);
-            }
-
         }
         else
         {
@@ -362,6 +374,8 @@ function FG_WorkflowDataReceived(gaggleData, goose)
                 for (var i = 0; i < actions.length; i++)
                 {
                     dump("Subaction: " + actions[i]);
+                    if (actions[i] == "NONE")
+                        continue;
                     newTab = FG_dispatchBroadcastToWebsite(gaggleData, actions[i]);
                     if (newTab != null)
                     {
