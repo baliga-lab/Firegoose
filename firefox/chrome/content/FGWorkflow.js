@@ -71,9 +71,7 @@ function InjectWorkflowData()
          //header.innerHTML = doc.title;
          //dataspacediv.appendChild(header);
          try {
-             var datadiv = doc.createElement("div");
-             var ul =  doc.createElement("ul");
-             datadiv.appendChild(ul);
+             var ul =  doc.getElementById("ulcaptureddata");
              for (var lindex = 0; lindex < FG_collectedData.length; lindex++) {
                 var li = doc.createElement("li");
                 li.className = "unselectedworkflow";
@@ -90,6 +88,10 @@ function InjectWorkflowData()
                 dump("\nurl nodename: " + url.nodeName);
                 var urlclone = url.cloneNode(true);
                 label.appendChild(urlclone);
+                var inputdataid = doc.createElement("input");
+                inputdataid.type = "hidden";
+                inputdataid.setAttribute("value", "");
+                label.appendChild(inputdataid);
                 var hoverimage = doc.createElement("img");
                 hoverimage.className = "dataspacehoverimage";
                 hoverimage.src = "http://networks.systemsbiology.net/static/images/list-add.png";
@@ -97,7 +99,7 @@ function InjectWorkflowData()
                 li.appendChild(label);
                 //datadiv.appendChild(FG_collectedData[lindex]);
              }
-             dataspacediv.appendChild(datadiv);
+             //dataspacediv.appendChild(datadiv);
 
              // set the signal value to trigger the UI actions
              var inputsignal = doc.getElementById("inputDataSignal");
@@ -347,6 +349,7 @@ function FG_WorkflowDataReceived(gaggleData, goose)
             {
                 if (actions[i] != null && actions[i] != "NONE" && actions[i].length > 0 )
                 {
+                    var datastring = actions[i];
                     newTab = getBrowser().addTab(actions[i]);
                     getBrowser().selectedTab = newTab;
                     if (newTab != null)
