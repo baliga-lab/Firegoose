@@ -1,5 +1,5 @@
-var FG_workflowPageUrl = "http://localhost:8000/workflow";
-//var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
+//var FG_workflowPageUrl = "http://localhost:8000/workflow";
+var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "wfdataspace";
 var FG_sendDataToWorkflow = false;
 var FG_collectedData = [];
@@ -74,7 +74,7 @@ function InjectWorkflowData()
              var ul =  doc.getElementById("ulcaptureddata");
              for (var lindex = 0; lindex < FG_collectedData.length; lindex++) {
                 var li = doc.createElement("li");
-                li.className = "unselectedworkflow";
+                li.className = "licaptureddata";
                 ul.appendChild(li);
                 var label = doc.createElement("label");
                 label.className = "dataspacelabel";
@@ -177,6 +177,7 @@ function FG_workflowDataExtract(elementID, elementType)
           {
               //alert(getSelectedElements(focusedElement, "a"));
               elements1 = getSelectedElements(focusedElement, "a");
+              dump("\nSelected a tags: " + elements1);
 
           }
           catch(e)
@@ -197,8 +198,10 @@ function FG_workflowDataExtract(elementID, elementType)
           dump("\nWinWrapper: " + winWrapper);
           var Selection = winWrapper.getSelection();
           dump("\n Section: " + Selection);
-          elements2 = getSelectedElements(winWrapper, "a");
-          dump("\nSelected elements: " + elements2);
+          if (Selection != null) {
+              elements2 = getSelectedElements(winWrapper, "a");
+              dump("\nSelected elements: " + elements2);
+          }
           //parseSelection(Selection);
       }
 
