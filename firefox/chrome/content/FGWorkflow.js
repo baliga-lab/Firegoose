@@ -1,5 +1,5 @@
-//var FG_workflowPageUrl = "http://localhost:8000/workflow";
-var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
+var FG_workflowPageUrl = "http://localhost:8000/workflow";
+//var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "wfdataspace";
 var FG_sendDataToWorkflow = false;
 var FG_collectedData = [];
@@ -338,7 +338,7 @@ function FG_WorkflowDataReceived(gaggleData, goose)
         // set the UI
         FG_setWorkflowUI(action);
 
-        dump("Workflow data " + gaggleData.getType() + " received for Session: " + action.getSessionID() + "\n");
+        dump("\nWorkflow data " + gaggleData.getType() + " received for Session: " + action.getSessionID() + "\n");
         var newTab;
         if (gaggleData.getType() == "WorkflowData")
         {
@@ -390,6 +390,8 @@ function FG_WorkflowDataReceived(gaggleData, goose)
                     }
                 }
             }
+            else
+                FG_Workflow_InProgress = false;
         }
     }
     catch(e)
@@ -662,10 +664,12 @@ FG_GaggleWorkflowDataFromGoose.prototype.getData = function() {
 
 FG_GaggleWorkflowDataFromGoose.prototype.getWorkflowAction = function() {
     var goose = javaFiregooseLoader.getGoose();
+    dump("\nGetting WorkflowAction for " + this.requestID);
     return goose.getWorkflowAction(this.requestID);
 }
 
 FG_GaggleWorkflowDataFromGoose.prototype.getSubAction = function() {
      var goose = javaFiregooseLoader.getGoose();
+     dump("\nGetting subaction for " + this.requestID);
      return goose.getWorkflowDataSubAction(this.requestID);
 }
