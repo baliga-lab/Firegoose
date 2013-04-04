@@ -273,7 +273,7 @@ function FG_workflowDataExtract(elementID, elementType)
                                  }
                              }
                          }
-                         else if ((checkboxFound && rowchecked) || !checkboxFound) {
+                         if ((checkboxFound && rowchecked) || !checkboxFound) {
                              var urls = cell.getElementsByTagName("a");
                              for (var j = 0; j < urls.length; j++)
                              {
