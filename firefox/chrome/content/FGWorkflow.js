@@ -88,10 +88,22 @@ function InjectWorkflowData()
                 dump("\nurl nodename: " + url.nodeName);
                 var urlclone = url.cloneNode(true);
                 label.appendChild(urlclone);
+
                 var inputdataid = doc.createElement("input");
                 inputdataid.type = "hidden";
                 inputdataid.setAttribute("value", "");
                 label.appendChild(inputdataid);
+
+                var inputorganism = doc.createElement("input");
+                inputorganism.type = "hidden";
+                inputorganism.setAttribute("value", "Generic");
+                label.appendChild(inputorganism);
+
+                var inputdatatype = doc.createElement("input");
+                inputdatatype.type = "hidden";
+                inputdatatype.setAttribute("value", "Generic");
+                label.appendChild(inputdatatype);
+
                 var hoverimage = doc.createElement("img");
                 hoverimage.className = "dataspacehoverimage";
                 hoverimage.src = "http://networks.systemsbiology.net/static/images/list-add.png";

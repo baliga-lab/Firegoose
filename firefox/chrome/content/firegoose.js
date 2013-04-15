@@ -916,15 +916,15 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
         dump("\nHandle namelist\n");
         if (handler.handleNameList) {
             dump("Can handle namelist");
-            if (goose != null)
-                goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
+            //if (goose != null)
+            //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
             return handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
         }
     }
     else if (datatype == "Map") {
         if (handler.handleMap) {
-            if (goose != null)
-                goose.recordWorkflow(null, url, target, "{\"datatype\":\"Map\"}");
+            //if (goose != null)
+            //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Map\"}");
             return handler.handleMap(
                     broadcastData.getSpecies(),
                     broadcastData.getName(),
@@ -933,8 +933,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     }
     else if (datatype == "Network") {
             if (handler.handleNetwork) {
-                if (goose != null)
-                    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Network\"}");
+                //if (goose != null)
+                //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Network\"}");
                 return handler.handleNetwork(broadcastData.getSpecies(), broadcastData.getData());
             }
             // if target doesn't take a network, use node names as a name list
@@ -942,16 +942,16 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
                 {
-                    if (goose != null)
-                        goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
+                    //if (goose != null)
+                    //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
                     return handler.handleNameList(broadcastData.getSpecies(), names);
                 }
             }
     }
     else if (datatype == "DataMatrix") {
             if (handler.handleMatrix) {
-                if (goose != null)
-                    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Matrix\"}");
+                //if (goose != null)
+                //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Matrix\"}");
                 return handler.handleMatrix(broadcastData);
             }
             // if target doesn't take a matrix, use row names as a name list
@@ -959,8 +959,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
                 {
-                    if (goose != null)
-                        goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
+                    //if (goose != null)
+                    //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
                     return handler.handleNameList(broadcastData.getSpecies(), names);
                 }
             }
@@ -969,8 +969,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             dump("\nHandle cluster\n");
             if (handler.handleCluster) {
                 dump("STARTING Handle cluster\n");
-                if (goose != null)
-                    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Cluster\"}");
+                //if (goose != null)
+                //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Cluster\"}");
                 return handler.handleCluster(
                         broadcastData.getSpecies(),
                         broadcastData.getName(),
@@ -982,8 +982,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 var names = broadcastData.getDataAsNameList();
                 if (names)
                 {
-                    if (goose != null)
-                        goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
+                    //if (goose != null)
+                    //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
                     return handler.handleNameList(broadcastData.getSpecies(), names);
                 }
             }
@@ -1011,7 +1011,7 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
         dump("broadcasting some identifiers: " + broadcastData.getData() + "\n");
         var javaArray = javaFiregooseLoader.toJavaStringArray(broadcastData.getData());
         goose.broadcastNameList(target, broadcastData.getName(), broadcastData.getSpecies(), javaArray);
-        goose.recordWorkflow(target, url, null, "{\"datatype\":\"Namelist\"}");
+        //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Namelist\"}");
     }
     else if (broadcastData.getType() == "Map") {
         goose.broadcastMap(
@@ -1019,7 +1019,7 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
                 broadcastData.getSpecies(),
                 broadcastData.getName(),
                 FG_objectToJavaHashMap(broadcastData.getData()));
-        goose.recordWorkflow(target, url, null, "{\"datatype\":\"Map\"}");
+        //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Map\"}");
     }
     else if (broadcastData.getType() == "Network") {
             // network is a java object
@@ -1027,7 +1027,7 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
             // TODO is this necessary? apply defaulting to species
             network.setSpecies(broadcastData.getSpecies());
             goose.broadcastNetwork(target, network);
-            goose.recordWorkflow(target, url, null, "{\"datatype\":\"Network\"}");
+            //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Network\"}");
         }
         else if (broadcastData.getType() == "DataMatrix") {
                 // matrix is a java object
@@ -1035,7 +1035,7 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
                 // TODO is this necessary? apply defaulting to species
                 matrix.setSpecies(broadcastData.getSpecies());
                 goose.broadcastDataMatrix(target, matrix);
-                goose.recordWorkflow(target, url, null, "{\"datatype\":\"Matrix\"}");
+                //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Matrix\"}");
             }
             else if (broadcastData.getType() == "Cluster") {
                     goose.broadcastCluster(
@@ -1044,7 +1044,7 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
                             broadcastData.getName(),
                             broadcastData.getData().rowNames,
                             broadcastData.getData().columnNames);
-                    goose.recordWorkflow(target, url, null, "{\"datatype\":\"Cluster\"}");
+                    //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Cluster\"}");
                 }
                 else {
                     FG_trace("Error in FG_dispatchBroadcastToGoose(broadcastData, target): Unknown data type: \"" + broadcastData.getType() + "\"");

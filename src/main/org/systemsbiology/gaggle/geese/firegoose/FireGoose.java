@@ -100,6 +100,7 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
     public String getWorkflowDataSubAction(String requestID)
     {
+        System.out.println("Get subaction for " + requestID);
         return this.workflowManager.getSubAction(requestID);
     }
 
@@ -363,6 +364,12 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
 
     public void handleNetwork(String sourceGooseName, Network network) throws RemoteException {
         System.out.println("incoming broadcast: network");
+    }
+
+    public GaggleGooseInfo getGooseInfo() throws RemoteException
+    {
+        System.out.println("Firgoose retrieving goose info...");
+        return this.workflowManager.getGooseInfo();
     }
 
     // Received workflow request from another component
