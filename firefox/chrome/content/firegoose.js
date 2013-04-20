@@ -1388,6 +1388,22 @@ function FG_pollGoose() {
             //goose.removeWorkflowRequest(requestID);
         }
 
+        // Save state
+        if (goose.getSaveStateFlag())
+        {
+            goose.setSaveStateFlag(false);
+            dump("\nSaving state " + goose.getSaveStateFileName());
+            FG_saveState(goose);
+        }
+
+        // Load State
+        if (goose.getLoadStateFlag())
+        {
+            goose.setLoadStateFlag(false);
+            dump("\nLoading state " + goose.getLoadStateFileName());
+            FG_loadState(goose);
+        }
+
         // we want to check if there's new data from the Gaggle,
         // and if not don't bother doing anything, otherwise we'll
         // be updating the GUI every second, which isn't too cool.

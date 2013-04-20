@@ -4,6 +4,72 @@ var FG_workflowDataspaceID = "wfdataspace";
 var FG_sendDataToWorkflow = false;
 var FG_collectedData = [];
 
+
+function FG_saveState(goose)
+{
+    if (goose != null) {
+        var filename = goose.getSaveStateFileName();
+        dump("\n=====>Save Firegoose state info to " + filename);
+        if (filename != null && filename.length > 0) {
+            var tabbrowser = getBrowser();
+            var taburls = "";
+
+            if (tabbrowser != null) {
+                //var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                //                 .getService(Components.interfaces.nsIWindowMediator);
+                //var browserEnumerator = wm.getEnumerator("navigator:browser");
+
+                // Check each browser instance for our URL
+
+            //while (!found && browserEnumerator.hasMoreElements()) {
+            //    var browserWin = browserEnumerator.getNext();
+            //    var tabbrowser = browserWin.gBrowser;
+
+                // Check each tab of this browser instance
+                var numTabs = tabbrowser.browsers.length;
+                goose.saveStateInfo("URLs:\n");
+                for (var index = 0; index < numTabs; index++) {
+                    var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+                    var url = currentBrowser.currentURI.spec;
+                    dump("\nSave url: " + url);
+                    goose.saveStateInfo(url + "\n");
+                }
+            }
+
+            goose.finishSaveState();
+        }
+    }
+}
+
+function FG_loadState(goose)
+{
+    if (goose != null) {
+        var filename = goose.getLoadStateFileName();
+        dump("\n=====>Load Firegoose state info from " + filename);
+        if (filename != null && filename.length > 0) {
+            var datatype = "";
+            do {
+                var info = goose.loadStateInfo();
+                dump("\nRead info: " + info)
+                if (info != null && info.length > 0) {
+                    if (info.indexOf("URLs:") >= 0) {
+                        // subsequent strings are all urls
+                        datatype = "url";
+                    }
+                    else {
+                        if (datatype == "url") {
+                            newTab = getBrowser().addTab(info);
+                        }
+                    }
+                }
+            }
+            while (!goose.getFinishedLoadingState());
+            goose.finishLoadState();
+        }
+    }
+}
+
+
 function FG_findOrCreateTabWithUrl(url)
 {
     var tabbrowser = getBrowser();
