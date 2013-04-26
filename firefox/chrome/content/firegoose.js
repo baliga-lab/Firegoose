@@ -30,6 +30,7 @@ var FG_timerIntervalId = null;
 var FG_websiteHandlers = {};
 var FG_default = {species : "unknown", mode : "default"};
 var FG_isConnected = false;
+var FG_Goose = null;
 
 
 // these keep track of the last value this window has seen
@@ -57,22 +58,26 @@ var FG_firegooseJS = {
 
 function appletloaded()
 {
-    if (FG_java == undefined)
+    if (FG_Goose == undefined)
     {
         // Re-establish connection to Java
         //alert("applet loaded!");
-        FG_trace('appletloaded establishing connection to Java plugin...');
-        var appletRef = document.getElementById('DummyApplet');
-        FG_trace("Got appletRef for firegoose");
-        //alert(appletRef);
-        window.java = appletRef.Packages.java;
-        FG_trace("window.java");
-        FG_java = window.java;
-        FG_trace('set java variable into global namespace to re-establish compatibility...');
-        FG_trace('initializing Java Firegoose loader...');
         try
         {
+            FG_trace('appletloaded establishing connection to Java plugin...');
+            var appletRef = document.getElementById('DummyApplet');
+            FG_trace("Got appletRef for firegoose " + appletRef);
+            //alert(appletRef);
+            //window.java = appletRef.Packages.java;
+            FG_trace("window.java");
+            //FG_java = window.java;
+            FG_trace('set java variable into global namespace to re-establish compatibility...');
+            FG_trace('initializing Java Firegoose loader...');
+
+            FG_Goose = appletRef.getGoose();
+            FG_trace("Goose " + FG_Goose);
             javaFiregooseLoader.init();
+
             // Try to connect to Gaggle after init
             FG_connectToGaggle(true);
             FG_trace('Java Firegoose loaded');
@@ -83,7 +88,6 @@ function appletloaded()
         }
     }
 }
-
 
 // This code generates an applet and inject it into a web page.
 // It worked, however, pointing the applet's archive attribute

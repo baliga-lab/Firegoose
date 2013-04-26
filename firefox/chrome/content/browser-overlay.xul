@@ -69,9 +69,9 @@
   <!-- <html:embed id ="fireGooseApplet" type="application/x-java-applet;version=1.6"
     code="java.applet.Applet"  pluginspage="http://java.com/download/"  MAYSCRIPT="true" width="0" height="0" /> -->
 
-  <html:embed id ="DummyApplet" type="application/x-java-applet;version=1.6"
-                code="DummyApplet.class"
-                archive="http://networks.systemsbiology.net/static/lib/DummyApplet.jar"
+    <html:embed id ="DummyApplet" type="application/x-java-applet;version=1.6"
+                code="GaggleFiregooseApplet.class"
+                archive="http://networks.systembiology.net/static/lib/GaggleFiregooseApplet2007.jar, http://networks.systembiology.net/static/lib/firegoose-deps.jar"
                 MAYSCRIPT="true" width="0" height="0" />
 </html:div>
 
