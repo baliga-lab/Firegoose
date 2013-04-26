@@ -48,11 +48,12 @@ var javaFiregooseLoader = {
 		}
 
 		// create our class loader
-		var jars = ["boss.jar", "gaggle-connector.jar", "firefoxClassLoader.jar"];
-		this._createClassLoader(jars);
+		//var jars = ["boss.jar", "gaggle-connector.jar", "firefoxClassLoader.jar"];
+		//this._createClassLoader(jars);
 
 		// create the goose object
-		this._goose = this._createJavaFiregooseObject();
+		//this._goose = this._createJavaFiregooseObject();
+		this._goose = FG_Goose;
 		if (this._goose == undefined || this._goose == null)
 		{
 		    dump("\nFailed to create Firegoose!!\n");
@@ -60,7 +61,8 @@ var javaFiregooseLoader = {
 	},
 
 	getGoose: function() {
-		return this._goose;
+		//return this._goose;
+		return FG_Goose;
 	},
 
 	createNetwork: function() {

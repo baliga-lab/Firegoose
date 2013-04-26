@@ -36,6 +36,7 @@ var FG_Current_WorkflowActions = new Array();
 var FG_Current_Tab;
 var FG_Current_GaggleData = null;
 var FG_Current_WebHandlerReportUrl = null; // A url of a web handler (e.g. EMBL String) to generate the report data
+var FG_Goose = null;
 
 // these keep track of the last value this window has seen
 // from the goose java class. We poll the goose asking if
@@ -62,22 +63,26 @@ var FG_firegooseJS = {
 
 function appletloaded()
 {
-    if (FG_java == undefined)
+    if (FG_Goose == undefined)
     {
         // Re-establish connection to Java
         //alert("applet loaded!");
-        FG_trace('appletloaded establishing connection to Java plugin...');
-        var appletRef = document.getElementById('DummyApplet');
-        FG_trace("Got appletRef for firegoose");
-        //alert(appletRef);
-        window.java = appletRef.Packages.java;
-        FG_trace("window.java");
-        FG_java = window.java;
-        FG_trace('set java variable into global namespace to re-establish compatibility...');
-        FG_trace('initializing Java Firegoose loader...');
         try
         {
+            FG_trace('appletloaded establishing connection to Java plugin...');
+            var appletRef = document.getElementById('DummyApplet');
+            FG_trace("Got appletRef for firegoose " + appletRef);
+            //alert(appletRef);
+            //window.java = appletRef.Packages.java;
+            FG_trace("window.java");
+            //FG_java = window.java;
+            FG_trace('set java variable into global namespace to re-establish compatibility...');
+            FG_trace('initializing Java Firegoose loader...');
+
+            FG_Goose = appletRef.getGoose();
+            FG_trace("Goose " + FG_Goose);
             javaFiregooseLoader.init();
+
             // Try to connect to Gaggle after init
             FG_connectToGaggle(true);
             FG_trace('Java Firegoose loaded');
@@ -99,10 +104,10 @@ function FG_generateAppletCode(doc, win)
 {
     if (doc != null && win != null && FG_java == undefined)
     {
-        dump("\nGetting DummyApplet...\n");
+        dump("\nGetting FiregooseApplet...\n");
         var guid = "firegoose@systemsbiology.org";
         var folderName = "chrome";
-        var fileName = "/DummyApplet.jar";
+        var fileName = "/GaggleFiregooseApplet.jar";
         dump("\nGetting appletFile...\n");
         try
         {
@@ -131,14 +136,14 @@ function FG_generateAppletCode(doc, win)
             var app = document.createElement('applet');
             app.id= 'DummyApplet';
             app.setAttribute("archive", fileUri);
-            app.setAttribute("code", 'DummyApplet.class');
+            app.setAttribute("code", 'GaggleFiregooseApplet.class');
             app.width = '0';
             app.height = '0';
             doc.getElementsByTagName('body')[0].appendChild(app);
         }
         catch (e)
         {
-            FG_trace("Failed to get DummyApplet: " + e);
+            FG_trace("Failed to get GaggleFiregooseApplet: " + e);
         }
 
     }
@@ -557,6 +562,7 @@ function FG_registerTargetChangeListener() {
  * their properties.
  */
 function FG_initUI() {
+      dump("\ninit UI...");
 	  FG_isConnected = FG_isConnectedToGaggle();
 
 	  try {
@@ -895,6 +901,22 @@ function FG_dispatchBroadcast(broadcastData, target, targetType) {
 // need some rethinking and simplifying. They're something of a mess.
 
 
+// Associate data to the tab created by a web handler
+// The data will be serialized during state saving
+function FG_attachTabData(newtab, target, broadcastData)
+{
+    if (newTab != null && broadcastData != null)
+    {
+        dump("\nAttach " + broadcastData + " target " + target + " to " + newTab);
+        tabdata = {};
+        tabdata.requestID = null;
+        tabdata.handler = target;
+        tabdata.broadcastData = broadcastData;
+        newtab.value = tabdata;
+    }
+}
+
+
 /**
  * Broadcast one of the gaggle data types to a website.
  */
@@ -918,24 +940,27 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             dump("Can handle namelist");
             //if (goose != null)
             //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
-            return handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
+            newtab = handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
+            FG_attachTabData(newtab, target, broadcastData);
         }
     }
     else if (datatype == "Map") {
         if (handler.handleMap) {
             //if (goose != null)
             //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Map\"}");
-            return handler.handleMap(
+            newtab = handler.handleMap(
                     broadcastData.getSpecies(),
                     broadcastData.getName(),
                     FG_objectToJavaHashMap(data));
+            FG_attachTabData(newtab, target, broadcastData);
         }
     }
     else if (datatype == "Network") {
             if (handler.handleNetwork) {
                 //if (goose != null)
                 //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Network\"}");
-                return handler.handleNetwork(broadcastData.getSpecies(), broadcastData.getData());
+                newtab = handler.handleNetwork(broadcastData.getSpecies(), broadcastData.getData());
+                FG_attachTabData(newtab, target, broadcastData);
             }
             // if target doesn't take a network, use node names as a name list
             else if (handler.handleNameList) {
@@ -944,7 +969,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 {
                     //if (goose != null)
                     //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
-                    return handler.handleNameList(broadcastData.getSpecies(), names);
+                    newtab = handler.handleNameList(broadcastData.getSpecies(), names);
+                    FG_attachTabData(newtab, target, broadcastData);
                 }
             }
     }
@@ -952,7 +978,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             if (handler.handleMatrix) {
                 //if (goose != null)
                 //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Matrix\"}");
-                return handler.handleMatrix(broadcastData);
+                newtab = handler.handleMatrix(broadcastData);
+                FG_attachTabData(newtab, target, broadcastData);
             }
             // if target doesn't take a matrix, use row names as a name list
             else if (handler.handleNameList) {
@@ -961,7 +988,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 {
                     //if (goose != null)
                     //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
-                    return handler.handleNameList(broadcastData.getSpecies(), names);
+                    newtab = handler.handleNameList(broadcastData.getSpecies(), names);
+                    FG_attachTabData(newtab, target, broadcastData);
                 }
             }
     }
@@ -971,11 +999,12 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 dump("STARTING Handle cluster\n");
                 //if (goose != null)
                 //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Cluster\"}");
-                return handler.handleCluster(
+                newtab = handler.handleCluster(
                         broadcastData.getSpecies(),
                         broadcastData.getName(),
                         broadcastData.rowNames,
                         broadcastData.columnNames);
+                FG_attachTabData(newtab, target, broadcastData);
             }
             // if target doesn't take a cluster, use row names as a name list
             else if (handler.handleNameList) {
@@ -984,7 +1013,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 {
                     //if (goose != null)
                     //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
-                    return handler.handleNameList(broadcastData.getSpecies(), names);
+                    newtab = handler.handleNameList(broadcastData.getSpecies(), names);
+                    FG_attachTabData(newtab, target, broadcastData);
                 }
             }
             dump("Cluster handled.");
@@ -1071,7 +1101,7 @@ function FG_objectToJavaTuple(object) {
 
 
 function FG_isConnectedToGaggle() {
-    var goose = javaFiregooseLoader.getGoose();
+    var goose = FG_Goose; //javaFiregooseLoader.getGoose();
     return goose ? goose.isConnected() : false;
 }
 
@@ -1136,7 +1166,7 @@ function FG_connectToGaggle(initializingFiregoose) {
         }
     }
     // adjust the UI
-    //	FG_adjustUi();
+    //  FG_adjustUi();
     //	FG_populateTargetChooser();
 }
 
