@@ -372,6 +372,16 @@ public class FireGoose implements Goose3, GaggleConnectionListener {
         return this.workflowManager.getGooseInfo();
     }
 
+    public void saveState(String directory, String filePrefix)
+    {
+
+    }
+
+    public void loadState(String filename)
+    {
+
+    }
+
     // Received workflow request from another component
     // We store the action in the workflowManager and then call the corresponding handle functions
     // to store properties of the data

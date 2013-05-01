@@ -905,14 +905,16 @@ function FG_dispatchBroadcast(broadcastData, target, targetType) {
 // The data will be serialized during state saving
 function FG_attachTabData(newtab, target, broadcastData)
 {
-    if (newTab != null && broadcastData != null)
+    if (newtab != null && broadcastData != null)
     {
-        dump("\nAttach " + broadcastData + " target " + target + " to " + newTab);
-        tabdata = {};
-        tabdata.requestID = null;
-        tabdata.handler = target;
-        tabdata.broadcastData = broadcastData;
-        newtab.value = tabdata;
+        dump("\n\n\n\nSetting tab value: " + target);
+        //if (tabvalue == null)
+        tabvalue = "";
+        //dump("\nhandler: " + tabvalue["handler"]);
+        tabvalue += (target);
+        tabvalue += (";;" + FG_gaggleDataHolder.getBroadcastDataLength());
+        newtab.value = tabvalue;
+        dump("\nAttached tab data: " + newtab.value);
     }
 }
 
@@ -928,11 +930,15 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     dump("\ntarget: " + target);
     dump("\nData: " + broadcastData.getData());
 
+    // Store the data to the queue for saving state purpose
+    FG_gaggleDataHolder.putBroadcastData(broadcastData);
+
     var goose = javaFiregooseLoader.getGoose();
     var url = null;
     var browser = gBrowser.selectedBrowser;
     url = browser.currentURI.spec;
     dump("\nCurrent URL: " + url);
+    var newtab = null;
 
     if (datatype == "NameList") {
         dump("\nHandle namelist\n");
@@ -1019,6 +1025,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             }
             dump("Cluster handled.");
     }
+    return newtab;
 }
 
 

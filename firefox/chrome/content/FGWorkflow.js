@@ -11,39 +11,55 @@ function FG_saveState(goose)
         var filename = goose.getSaveStateFileName();
         dump("\n=====>Save Firegoose state info to " + filename);
         if (filename != null && filename.length > 0) {
-            var tabbrowser = getBrowser();
-            var taburls = "";
+            var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                                 .getService(Components.interfaces.nsIWindowMediator);
+            var browserEnumerator = wm.getEnumerator("navigator:browser");
 
-            if (tabbrowser != null) {
-                //var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                //                 .getService(Components.interfaces.nsIWindowMediator);
-                //var browserEnumerator = wm.getEnumerator("navigator:browser");
+            while (browserEnumerator.hasMoreElements()) {
+                var browserWin = browserEnumerator.getNext();
+                dump("\nNext browser window: " + browserWin);
+                var tabbrowser = browserWin.gBrowser;
+                var taburls = "";
 
-                // Check each browser instance for our URL
+                if (tabbrowser != null) {
+                    // Check each tab of this browser instance
+                    var numTabs = tabbrowser.browsers.length;
+                    dump("\nNumber of tabs: " + numTabs);
+                    for (var index = 0; index < numTabs; index++) {
+                        var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+                        var url = currentBrowser.currentURI.spec;
+                        var currentTab = tabbrowser.tabContainer.childNodes[index];
+                        dump("\nTab value: " + currentTab.value);
+                        if (currentTab.value == null) {
+                            // No data is associated with this tab, we simply store the url
+                            dump("\nSave url: " + url);
+                            goose.saveStateInfo(url + "\n");
+                        }
+                        else {
+                            // The tab is created by a web handler, we need to save the data
+                            // in order to restore the state correctly
+                            var splitted = currentTab.value.split(";;");
+                            if (splitted.length != 3) {
+                                // Not enough workflow data stored, we save the url
+                                dump("\nSave url: " + url);
+                                goose.saveStateInfo(url + "\n");
+                            }
+                            else {
+                                // Workflow data associated with the tab, we save the handler as well as the data
+                                var handler = splitted[0];
+                                var broadcastdataIndex = splitted[1];
+                                dump("\nBroadcastdata Index: " + broadcastdataIndex);
+                                var requestID = splitted[2];
+                                var broadcastData = FG_gaggleDataHolder.getBroadcastData(parseInt(broadcastdataIndex) - 1);
 
-            //while (!found && browserEnumerator.hasMoreElements()) {
-            //    var browserWin = browserEnumerator.getNext();
-            //    var tabbrowser = browserWin.gBrowser;
-
-                // Check each tab of this browser instance
-                var numTabs = tabbrowser.browsers.length;
-                for (var index = 0; index < numTabs; index++) {
-                    var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-                    var url = currentBrowser.currentURI.spec;
-                    if (currentBrowser.value == null || currentBrowser.value.broadcastData == null) {
-                        // No data is associated with this tab, we simply store the url
-                        dump("\nSave url: " + url);
-                        goose.saveStateInfo(url + "\n");
-                    }
-                    else {
-                        // The tab is created by a web handler, we need to save the data
-                        // in order to restore the state correctly
-                        dump("\nSave handler: " + currentBrowser.value.handler);
-                        goose.saveStateInfo(currentBrowser.value.handler, currentBrowser.value.broadcastData.getData());
+                                dump("\nSave handler: " + handler + " data " + broadcastData.getGaggleData());
+                                goose.saveStateInfo(handler, broadcastData.getGaggleData());
+                            }
+                        }
                     }
                 }
             }
-
+            dump("\n\nFinishing save state...");
             goose.finishSaveState();
         }
     }
@@ -69,15 +85,13 @@ function FG_loadState(goose)
                         }
                         else if (type.indexOf("HANDLER") >= 0) {
                             var handler = splitted[1];
-                            dump("Pass data to handler " + handler);
-                            var data = {};
-                            for (var i = 2; i < splitted.length - 1; i++) {
-                                dump("Data " + splitted[i]);
-                                data[i - 2] = splitted[i];
-                            }
-                            var gaggleData = new FG_GaggleData("", "gaggle-namelist", splitted.length - 3, null, data);
-                            dump("Pass data to " + handler);
-                            FG_dispatchBroadcastToWebsite(gaggleData, handler);
+                            var dataclass = splitted[2];
+                            var datafilename = splitted[3];
+                            dump("\n=>>>>>Pass data to handler " + handler + " class " + dataclass + " from " + datafilename);
+                            //var gaggleData = new FG_GaggleData("", "gaggle-namelist", splitted.length - 3, null, data);
+                            var data = goose.getGaggleData(datafilename);
+                            dump("\nPass data to " + handler);
+                            FG_dispatchBroadcastToWebsite(data, handler);
                         }
                     }
                 }
@@ -455,9 +469,7 @@ function FG_WorkflowDataReceived(gaggleData, goose)
                     if (newTab != null)
                     {
                         dump("Setting tab value: " + gaggleData.getRequestID());
-                        tabdata = {};
-                        tabdata.requestID = gaggleData.getRequestID();
-                        tabdata.broadcastData = null;
+                        tabdata = gaggleData.getRequestID();
                         newTab.value = tabdata;
                         FG_Current_Tab = newTab;
                         FG_setWorkflowUI(action);
@@ -471,6 +483,11 @@ function FG_WorkflowDataReceived(gaggleData, goose)
         {
             // This is a WorkflowAction (Contains gaggleData such as Network, Cluster, Namelist, etc and a subaction)
             dump("SubAction: " + gaggleData.getSubAction() + "\n");
+
+            // Put the data to the holder and the broadcast chooser
+            //FG_gaggleDataHolder.put(gaggleData);
+            //FG_populateBroadcastChooser(gaggleData.getDescription());
+
             // We get a string of concatenated subactions delimited by ';'
             var subactions = gaggleData.getSubAction();
             if (subactions != null && subactions.length > 0)
@@ -482,14 +499,21 @@ function FG_WorkflowDataReceived(gaggleData, goose)
                     dump("Subaction: " + actions[i]);
                     if (actions[i] == "NONE")
                         continue;
-                    newTab = FG_dispatchBroadcastToWebsite(gaggleData, actions[i]);
-                    if (newTab != null)
+                    //var data = gaggleData.getWorkflowActionData();
+                    //if (data != null && data.length > 0)
                     {
-                        dump("Setting tab value: " + gaggleData.getRequestID());
-
-                        newTab.value = gaggleData.getRequestID();
-                        FG_Current_Tab = newTab;
-                        FG_setWorkflowUI(action);
+                        // TODO: now workflowAction only passes one data element
+                        // We might extend it to multiple elements
+                        newTab = FG_dispatchBroadcastToWebsite(gaggleData, actions[i]);
+                        if (newTab != null)
+                        {
+                            var tabvalue = newTab.value;
+                            tabvalue += (";;" + gaggleData.getRequestID());
+                            newTab.value = tabvalue;
+                            dump("\n\nFinal Tab value: " + newTab.value);
+                            FG_Current_Tab = newTab;
+                            FG_setWorkflowUI(action);
+                        }
                     }
                 }
             }
@@ -589,8 +613,12 @@ function FG_executeNextWorkflow(sessionID)
 {
     dump("\n===============>Next workflow component<=================\n");
 
-    dump("\nCurrent Tab value: " + FG_Current_Tab.value.requestID + "\n");
-    var gaggleWorkflowData = FG_findWorkflowData(FG_Current_Tab.value.requestID);
+    var tabvalue = FG_Current_Tab.value;
+    dump("\nTab value: " + tabvalue);
+    var splitted = tabvalue.split(";;");
+    var requestID = (splitted.length != 3) ? splitted[0] : splitted[2];
+    dump("\nExtracted requestID: " + requestID + "\n");
+    var gaggleWorkflowData = FG_findWorkflowData(requestID);
     if (gaggleWorkflowData)
     {
         var popup = document.getElementById("fg_nextcomponentPopup");
@@ -763,6 +791,27 @@ FG_GaggleWorkflowDataFromGoose.prototype.getData = function() {
     return data;
 
     // TODO:  handle all data types here and in FireGoose.java
+}
+
+FG_GaggleWorkflowDataFromGoose.prototype.getGaggleData = function() {
+    var goose = javaFiregooseLoader.getGoose();
+    var data = goose.getWorkflowData(this.requestID);
+    if (data != undefined && data.length != undefined)
+    {
+        dump("\nGet gaggle data of length " + data.length);
+        for (var i = 0; i < data.length; i++)
+        {
+            dump("\nName: " + data[i]);
+        }
+        dump("\n");
+        return data[0];
+    }
+    return null;
+}
+
+
+FG_GaggleWorkflowDataFromGoose.prototype.getDescription = function() {
+    return this.getName() + ": " + this.getType() + this._sizeString();
 }
 
 FG_GaggleWorkflowDataFromGoose.prototype.getWorkflowAction = function() {

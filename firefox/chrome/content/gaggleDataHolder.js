@@ -17,6 +17,7 @@ var FG_gaggleDataHolder = {
 
 	_pageData: {},
 	_gaggleData: null,
+	_gaggleBroadcastData: null,
 
 	getDescriptions: function() {
 		var result = {};
@@ -43,6 +44,23 @@ var FG_gaggleDataHolder = {
 		else
 			this._pageData[gaggleDataElement.getName()] = gaggleDataElement;
 	},
+
+    putBroadcastData: function(gaggleDataElement) {
+        if (this._gaggleBroadcastData == null)
+            this._gaggleBroadcastData = new Array();
+        this._gaggleBroadcastData.push(gaggleDataElement);
+        dump("\nBroadcast data array size: " + this._gaggleBroadcastData.length);
+    },
+
+    getBroadcastData: function(index) {
+        if (this._gaggleBroadcastData == null)
+            return null;
+        return this._gaggleBroadcastData[index];
+    },
+
+    getBroadcastDataLength: function(index) {
+        return this._gaggleBroadcastData.length;
+    },
 
 	putAll: function(gaggleDataElements) {
         //dump("FG_gaggleDataHolder put all!\n");

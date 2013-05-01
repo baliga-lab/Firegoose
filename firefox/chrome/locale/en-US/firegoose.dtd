@@ -1,5 +1,5 @@
-<!ENTITY firegoose.version "1.0.829">
-<!ENTITY firegoose.build.date "2013-03-06 14:39:59">
+<!ENTITY firegoose.version "1.0.778">
+<!ENTITY firegoose.build.date "2013-04-30 22:14:02">
 
 <!ENTITY firegoose.hello.label "Hello">
 <!ENTITY firegoose.jvm_info.label "JVM Info">
@@ -87,5 +87,5 @@
 <!ENTITY firegoose.executeNextWorkflow.tooltip "Execute the next step of the workflow.">
 
 <!ENTITY firegoose.sendToWorkflow.label "Capture">
-<!ENTITY firegoose.sendToWorkflow.accesskey "c">
-<!ENTITY firegoose.sendToWorkflow.tooltip "Capture the links and send it to the workflow page.">
+<!ENTITY firegoose.sendToWorkflow.accesskey "p">
+<!ENTITY firegoose.sendToWorkflow.tooltip "Capture urls on the web page to workflow data space.">

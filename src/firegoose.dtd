@@ -85,3 +85,7 @@
 <!ENTITY firegoose.executeNextWorkflow.label "Next">
 <!ENTITY firegoose.executeNextWorkflow.accesskey "w">
 <!ENTITY firegoose.executeNextWorkflow.tooltip "Execute the next step of the workflow.">
+
+<!ENTITY firegoose.sendToWorkflow.label "Capture">
+<!ENTITY firegoose.sendToWorkflow.accesskey "p">
+<!ENTITY firegoose.sendToWorkflow.tooltip "Capture urls on the web page to workflow data space.">
