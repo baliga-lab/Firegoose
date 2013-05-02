@@ -89,9 +89,16 @@ function FG_loadState(goose)
                             var datafilename = splitted[3];
                             dump("\n=>>>>>Pass data to handler " + handler + " class " + dataclass + " from " + datafilename);
                             //var gaggleData = new FG_GaggleData("", "gaggle-namelist", splitted.length - 3, null, data);
-                            var data = goose.getGaggleData(datafilename);
+                            var data = goose.loadGaggleData(datafilename);
                             dump("\nPass data to " + handler);
-                            FG_dispatchBroadcastToWebsite(data, handler);
+                            if (data != null)
+                            {
+                                var type = dataclass.substring(dataclass.lastIndexOf(".") + 1);
+                                dump("\nType: " + type);
+                                var deserializedData = new FG_GaggleDeserializedData(data, type);
+                                //deserializedData.initializeData(data, type);
+                                FG_dispatchBroadcastToWebsite(deserializedData, handler);
+                            }
                         }
                     }
                 }
@@ -825,3 +832,61 @@ FG_GaggleWorkflowDataFromGoose.prototype.getSubAction = function() {
      dump("\nGetting subaction for " + this.requestID);
      return goose.getWorkflowDataSubAction(this.requestID);
 }
+
+
+// Delegate for restore data
+// the name "gaggle" is required for a cheap and sleazy hack in FG_gaggleDataHolder
+//FG_GaggleWorkflowDataFromGoose.prototype = new FG_GaggleData("gaggle", requestID);
+FG_GaggleDeserializedData.prototype = new FG_GaggleData();
+FG_GaggleDeserializedData.prototype.constructor = FG_GaggleDeserializedData;
+
+function FG_GaggleDeserializedData(data, type) {
+    try {
+        dump("\nData " + data + " Type " + type);
+        this._type = type;
+        if (type == "Namelist")
+        {
+            this._data = data.getNames();
+            this._size = data.getNames().length;
+            dump("\nNamelist length: " + this._size);
+        }
+        else if (type == "Cluster")
+        {
+            this._data = data.getRowNames();
+            this._size = data.getRowNames().length;
+            dump("\nCluster length: " + this._size);
+        }
+        else if (type == "Network") {
+
+        }
+
+        this._species = data.getSpecies();
+        this._name = data.getName();
+    }
+    catch (e) {
+        dump("\nFailed to analyze deserialized data: " + e);
+    }
+}
+
+FG_GaggleDeserializedData.prototype.getType = function() {
+    return this._type;
+}
+
+FG_GaggleDeserializedData.prototype.getSize = function() {
+    return this._data.getSize();
+}
+
+FG_GaggleDeserializedData.prototype.getSpecies = function() {
+    return this._species;
+}
+
+FG_GaggleDeserializedData.prototype.getData = function() {
+    return this._data;
+
+    // TODO:  handle all data types here and in FireGoose.java
+}
+
+FG_GaggleDeserializedData.prototype.getDescription = function() {
+    return this.getName() + ": " + this.getType() + this._sizeString();
+}
+

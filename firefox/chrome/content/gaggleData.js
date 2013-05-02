@@ -207,14 +207,13 @@ FG_GaggleData.jsToJavaNetwork = function(name, species, jsNetwork) {
 
 FG_GaggleData.prototype.setRequestID = function(requestID)
 {
-    dump("Setting RequestID: " + requestID);
+    dump("\nSetting RequestID: " + requestID);
     this.requestID = requestID;
 };
 
 FG_GaggleData.prototype.getRequestID = function()
 {
-    dump("Getting RequestID: " + this.requestID);
+    dump("\nGetting RequestID: " + this.requestID);
     return this.requestID;
 };
-
 

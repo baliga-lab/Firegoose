@@ -940,7 +940,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     dump("\nCurrent URL: " + url);
     var newtab = null;
 
-    if (datatype == "NameList") {
+    try {
+    if (datatype.toLowerCase() == "namelist") {
         dump("\nHandle namelist\n");
         if (handler.handleNameList) {
             dump("Can handle namelist");
@@ -950,7 +951,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             FG_attachTabData(newtab, target, broadcastData);
         }
     }
-    else if (datatype == "Map") {
+    else if (datatype.toLowerCase() == "map") {
         if (handler.handleMap) {
             //if (goose != null)
             //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Map\"}");
@@ -961,7 +962,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             FG_attachTabData(newtab, target, broadcastData);
         }
     }
-    else if (datatype == "Network") {
+    else if (datatype.toLowerCase() == "network") {
             if (handler.handleNetwork) {
                 //if (goose != null)
                 //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Network\"}");
@@ -980,7 +981,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 }
             }
     }
-    else if (datatype == "DataMatrix") {
+    else if (datatype.toLowerCase() == "datamatrix") {
             if (handler.handleMatrix) {
                 //if (goose != null)
                 //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Matrix\"}");
@@ -999,7 +1000,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 }
             }
     }
-    else if (datatype == "Cluster") {
+    else if (datatype.toLowerCase() == "cluster") {
             dump("\nHandle cluster\n");
             if (handler.handleCluster) {
                 dump("STARTING Handle cluster\n");
@@ -1024,6 +1025,10 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
                 }
             }
             dump("Cluster handled.");
+    }
+    }
+    catch (e) {
+        dump("\n\nFailed to handle data: " + e);
     }
     return newtab;
 }
