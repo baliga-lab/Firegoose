@@ -1,5 +1,5 @@
-var FG_workflowPageUrl = "http://localhost:8000/workflow";
-//var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
+//var FG_workflowPageUrl = "http://localhost:8000/workflow";
+var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "wfdataspace";
 var FG_sendDataToWorkflow = false;
 var FG_collectedData = [];
@@ -39,21 +39,37 @@ function FG_saveState(goose)
                             // The tab is created by a web handler, we need to save the data
                             // in order to restore the state correctly
                             var splitted = currentTab.value.split(";;");
-                            if (splitted.length != 3) {
+                            if (splitted.length < 2) {
                                 // Not enough workflow data stored, we save the url
                                 dump("\nSave url: " + url);
                                 goose.saveStateInfo(url + "\n");
                             }
                             else {
                                 // Workflow data associated with the tab, we save the handler as well as the data
-                                var handler = splitted[0];
-                                var broadcastdataIndex = splitted[1];
-                                dump("\nBroadcastdata Index: " + broadcastdataIndex);
-                                var requestID = splitted[2];
-                                var broadcastData = FG_gaggleDataHolder.getBroadcastData(parseInt(broadcastdataIndex) - 1);
-
-                                dump("\nSave handler: " + handler + " data " + broadcastData.getGaggleData());
-                                goose.saveStateInfo(handler, broadcastData.getGaggleData());
+                                try {
+                                    var handler = splitted[0];
+                                    var broadcastdataIndex = splitted[1];
+                                    dump("\nBroadcastdata Index: " + broadcastdataIndex);
+                                    var broadcastData = FG_gaggleDataHolder.getBroadcastData(parseInt(broadcastdataIndex) - 1);
+                                    dump("\nData " + broadcastData);
+                                    var data = null;
+                                    if (broadcastData.getGaggleData == undefined)
+                                    {
+                                        dump("\nSave namelist data");
+                                        goose.saveStateInfo(handler,
+                                            broadcastData.getName(),
+                                            broadcastData.getSpecies(),
+                                            broadcastData.getData());
+                                    }
+                                    else {
+                                        data = broadcastData.getGaggleData();
+                                        dump("\nSave handler: " + handler + " data " + data);
+                                        goose.saveStateInfo(handler, data);
+                                    }
+                                }
+                                catch(e) {
+                                    dump("\n\nFailed to save broadcast data: " + e);
+                                }
                             }
                         }
                     }

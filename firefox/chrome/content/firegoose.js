@@ -1049,48 +1049,57 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
     // behavior of the GaggleData object. The java objects should
     // get the species that comes from the over-ridden method with
     // proper defaulting.
-    if (broadcastData.getType() == "NameList") {
-        dump("broadcasting some identifiers: " + broadcastData.getData() + "\n");
-        var javaArray = javaFiregooseLoader.toJavaStringArray(broadcastData.getData());
-        goose.broadcastNameList(target, broadcastData.getName(), broadcastData.getSpecies(), javaArray);
-        //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Namelist\"}");
-    }
-    else if (broadcastData.getType() == "Map") {
-        goose.broadcastMap(
-                target,
-                broadcastData.getSpecies(),
-                broadcastData.getName(),
-                FG_objectToJavaHashMap(broadcastData.getData()));
-        //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Map\"}");
-    }
-    else if (broadcastData.getType() == "Network") {
-            // network is a java object
-            var network = broadcastData.getData();
-            // TODO is this necessary? apply defaulting to species
-            network.setSpecies(broadcastData.getSpecies());
-            goose.broadcastNetwork(target, network);
-            //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Network\"}");
+    try
+    {
+        if (broadcastData.getType() == "NameList") {
+            dump("\nbroadcasting some identifiers to " + target + " " + broadcastData.getData() + "\n");
+            var javaArray = javaFiregooseLoader.jsStringArrayToDelimitedString(broadcastData.getData(), ";");
+            dump("\n\n\nData: " + javaArray);
+              //.toJavaStringArray(broadcastData.getData());
+            goose.broadcastNameList(target, broadcastData.getName(), broadcastData.getSpecies(), javaArray, ";");
+            //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Namelist\"}");
         }
-        else if (broadcastData.getType() == "DataMatrix") {
-                // matrix is a java object
-                var matrix = broadcastData.getData();
+        else if (broadcastData.getType() == "Map") {
+            goose.broadcastMap(
+                    target,
+                    broadcastData.getSpecies(),
+                    broadcastData.getName(),
+                    FG_objectToJavaHashMap(broadcastData.getData()));
+            //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Map\"}");
+        }
+        else if (broadcastData.getType() == "Network") {
+                // network is a java object
+                var network = broadcastData.getData();
                 // TODO is this necessary? apply defaulting to species
-                matrix.setSpecies(broadcastData.getSpecies());
-                goose.broadcastDataMatrix(target, matrix);
-                //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Matrix\"}");
+                network.setSpecies(broadcastData.getSpecies());
+                goose.broadcastNetwork(target, network);
+                //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Network\"}");
             }
-            else if (broadcastData.getType() == "Cluster") {
-                    goose.broadcastCluster(
-                            target,
-                            broadcastData.getSpecies(),
-                            broadcastData.getName(),
-                            broadcastData.getData().rowNames,
-                            broadcastData.getData().columnNames);
-                    //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Cluster\"}");
+            else if (broadcastData.getType() == "DataMatrix") {
+                    // matrix is a java object
+                    var matrix = broadcastData.getData();
+                    // TODO is this necessary? apply defaulting to species
+                    matrix.setSpecies(broadcastData.getSpecies());
+                    goose.broadcastDataMatrix(target, matrix);
+                    //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Matrix\"}");
                 }
-                else {
-                    FG_trace("Error in FG_dispatchBroadcastToGoose(broadcastData, target): Unknown data type: \"" + broadcastData.getType() + "\"");
-                }
+                else if (broadcastData.getType() == "Cluster") {
+                        goose.broadcastCluster(
+                                target,
+                                broadcastData.getSpecies(),
+                                broadcastData.getName(),
+                                broadcastData.getData().rowNames,
+                                broadcastData.getData().columnNames);
+                        //goose.recordWorkflow(target, url, null, "{\"datatype\":\"Cluster\"}");
+                    }
+                    else {
+                        FG_trace("Error in FG_dispatchBroadcastToGoose(broadcastData, target): Unknown data type: \"" + broadcastData.getType() + "\"");
+                    }
+    }
+    catch (e) {
+        dump("\n\n!!!!!Failed to broadcast: " + e);
+    }
+
 }
 
 
