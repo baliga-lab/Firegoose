@@ -152,12 +152,20 @@ FG_GaggleData.prototype.getDataAsNameList = function() {
 // takes a javascript dataMatrix object and returns a java DataMatrix.
 FG_GaggleData.jsToJavaDataMatrix = function(name, species, jsDataMatrix) {
 	var matrix = javaFiregooseLoader.createDataMatrix();
+	var data = jsDataMatrix.data;
+	dump("\nData " + data);
+	var rows = data.length;
+	dump("\nMatrix rows " + rows);
+	var columns = data[0].length;
+	dump("\nMatrix columns " + columns);
+
 	matrix.setName(name);
 	matrix.setSpecies(species);
 	matrix.setRowTitlesTitle(jsDataMatrix.rowTitlesTitle)
 	matrix.setRowTitles(javaFiregooseLoader.toJavaStringArray(jsDataMatrix.rowTitles));
-	matrix.setColumnTitles(javaFiregooseLoader.toJavaStringArray(jsDataMatrix.columnTitles))
-	matrix.set(javaFiregooseLoader.toJavaDoubleMatrix(jsDataMatrix.data));
+	matrix.setColumnTitles(javaFiregooseLoader.toJavaStringArray(jsDataMatrix.columnTitles));
+	var twodimensionarray = javaFiregooseLoader.toJavaDoubleMatrix(jsDataMatrix.data);
+	matrix.set(twodimensionarray); //, rows, columns);
 	return matrix;
 };
 

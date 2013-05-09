@@ -66,8 +66,11 @@ var javaFiregooseLoader = {
 	},
 
 	createNetwork: function() {
-		dump("create Network\n");
-		return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Network").callConstructor([]);
+		dump("\n\nCreate Network\n");
+        var network = FG_Goose.getObject("org.systemsbiology.gaggle.core.datatypes.Network");
+        dump("\nNetwork " + interaction);
+        return network;
+		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Network").callConstructor([]);
 	},
 
 	/**
@@ -76,12 +79,18 @@ var javaFiregooseLoader = {
 	 */
 	createInteraction: function(source, target, interactionType) {
 		var args = this.toJavaStringArray([source, target, interactionType]);
-		return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Interaction").callConstructor(args);
+		var interaction = FG_Goose.getObject("org.systemsbiology.gaggle.core.datatypes.Interaction");
+		dump("\nInteraction " + interaction);
+		return interaction;
+		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Interaction").callConstructor(args);
 	},
 
 	createDataMatrix: function() {
-		dump("create DataMatrix\n");
-		return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.DataMatrix").callConstructor([]);
+		dump("\nCreate DataMatrix\n");
+		var matrix = FG_Goose.getObject("org.systemsbiology.gaggle.core.datatypes.DataMatrix");
+		dump("\n" + matrix);
+		return matrix;
+		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.DataMatrix").callConstructor([]);
 	},
 
 	/**
@@ -95,20 +104,24 @@ var javaFiregooseLoader = {
 	 * See toJavaStringArray.
 	 */
 	toJavaArray: function(arrayClass, a) {
-		var javaArray = java.lang.reflect.Array.newInstance(arrayClass, a.length);
+		//var javaArray = java.lang.reflect.Array.newInstance(arrayClass, a.length);
+		javaArray = FG_Goose.getJavaArray(arrayClass, a.length);
 		for (var i = 0; i < a.length; i++) {
 			var element = a[i];
-			java.lang.reflect.Array.set(javaArray, i, element);
+			//java.lang.reflect.Array.set(javaArray, i, element);
+			FG_Goose.setArrayElement(javaArray, i, element);
 		}
 		return javaArray;
 	},
 
 	toJavaStringArray: function(a) {
 	    dump("\nLength of string array: " + a.length + "\n");
-		var javaArray = java.lang.reflect.Array.newInstance(this.stringClass, a.length);
+		//var javaArray = java.lang.reflect.Array.newInstance(this.stringClass, a.length);
+		var javaArray = FG_Goose.getJavaArray("java.lang.String", a.length);
 		for (var i = 0; i < a.length; i++) {
 			var element = a[i];
-			java.lang.reflect.Array.set(javaArray, i, element);
+			//java.lang.reflect.Array.set(javaArray, i, element);
+			FG_Goose.setArrayElement(javaArray, i, element);
 		}
 		return javaArray;
 	},
@@ -133,16 +146,29 @@ var javaFiregooseLoader = {
 	 */
 	toJavaDoubleMatrix: function(data) {
 		dump("converting...\n");
-		var dimensions = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 2);
-		dimensions[0] = data.length;
-		dump("length = " + data.length + "\n");
-		var java2dArrayOfDouble = java.lang.reflect.Array.newInstance(java.lang.Double.TYPE, dimensions);
+		//var dimensions = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 2);
+		//dimensions[0] = data.length;
+		dump("row = " + data.length + " column = " + data[0].length + "\n");
+		var rows = data.length;
+		var columns = data[0].length;
+		//var java2dArrayOfDouble = java.lang.reflect.Array.newInstance(java.lang.Double.TYPE, dimensions);
+		var java2dArrayOfDouble = FG_Goose.get2DJavaArrayDouble(rows, columns);
 
-		for (var i=0; i < data.length; i++) {
-			dump("data[i] = " + data[i] + "\n");
+		for (var i=0; i < rows; i++) {
+			dump("\ndata[i] = " + data[i] + "\n");
+			dump("\narray[i]: " + java2dArrayOfDouble[i]);
 			//java2dArrayOfDouble[i] = this.toJavaArray(java.lang.Double.TYPE, data[i]);
-			java2dArrayOfDouble[i] = data[i];
+			for (var j = 0; j < columns; j++)
+			{
+			    dump("\nData[" + i + ", " + j + "] = " + data[i][j]);
+			    //var doublevalue = FG_Goose.getDoubleObjectFromDouble(data[i][j].toFixed(10));
+			    //dump("\nDouble value: " + doublevalue);
+			    FG_Goose.set2DJavaArrayDoubleValue(java2dArrayOfDouble, i, j, data[i][j].toFixed(10));
+			    dump("\nAssigned value: " + java2dArrayOfDouble[i][j]);
+			    //java2dArrayOfDouble[i] = data[i];
+			}
 		}
+		dump("\nReturned...\n")
 		return java2dArrayOfDouble;
 	},
 
