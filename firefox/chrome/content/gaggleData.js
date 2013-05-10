@@ -165,7 +165,7 @@ FG_GaggleData.jsToJavaDataMatrix = function(name, species, jsDataMatrix) {
 	matrix.setRowTitles(javaFiregooseLoader.toJavaStringArray(jsDataMatrix.rowTitles));
 	matrix.setColumnTitles(javaFiregooseLoader.toJavaStringArray(jsDataMatrix.columnTitles));
 	var twodimensionarray = javaFiregooseLoader.toJavaDoubleMatrix(jsDataMatrix.data);
-	matrix.set(twodimensionarray); //, rows, columns);
+	matrix.set(twodimensionarray);
 	return matrix;
 };
 

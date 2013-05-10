@@ -160,11 +160,11 @@ var javaFiregooseLoader = {
 			//java2dArrayOfDouble[i] = this.toJavaArray(java.lang.Double.TYPE, data[i]);
 			for (var j = 0; j < columns; j++)
 			{
-			    dump("\nData[" + i + ", " + j + "] = " + data[i][j]);
+			    //dump("\nData[" + i + ", " + j + "] = " + data[i][j]);
 			    //var doublevalue = FG_Goose.getDoubleObjectFromDouble(data[i][j].toFixed(10));
 			    //dump("\nDouble value: " + doublevalue);
 			    FG_Goose.set2DJavaArrayDoubleValue(java2dArrayOfDouble, i, j, data[i][j].toFixed(10));
-			    dump("\nAssigned value: " + java2dArrayOfDouble[i][j]);
+			    //dump("\nAssigned value: " + java2dArrayOfDouble[i][j]);
 			    //java2dArrayOfDouble[i] = data[i];
 			}
 		}
