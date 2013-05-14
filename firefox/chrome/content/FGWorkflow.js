@@ -1,8 +1,10 @@
 //var FG_workflowPageUrl = "http://localhost:8000/workflow";
-var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
+var FG_workflowPageUrl = "http://poland:8000/workflow";
+//var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "wfdataspace";
 var FG_sendDataToWorkflow = false;
-var FG_collectedData = [];
+var FG_collectedData = null;
+var FG_collectedTableData = null;
 
 
 function FG_saveState(goose)
@@ -180,6 +182,54 @@ function FG_findOrCreateTabWithUrl(url)
     return urltab;
 }
 
+function InsertData(url, ul)
+{
+    if (url != null) {
+        var doc = gBrowser.contentDocument;
+
+        var li = doc.createElement("li");
+        li.className = "licaptureddata";
+        ul.appendChild(li);
+
+        var label = doc.createElement("label");
+        label.className = "dataspacelabel";
+        var checkbox = doc.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "dataspacecheckbox";
+        checkbox.name = "checkboxCapturedData";
+        label.appendChild(checkbox);
+        dump("\nurl: " + url);
+        dump("\nurl nodename: " + url.nodeName);
+        var urlclone = url.cloneNode(true);
+        label.appendChild(urlclone);
+
+        var inputdataid = doc.createElement("input");
+        inputdataid.type = "hidden";
+        inputdataid.setAttribute("value", "");
+        label.appendChild(inputdataid);
+
+        // Captured data is set to be of both Generic organisms and
+        // Generic data types, so they will always show up in the
+        // workflow data space
+        var inputorganism = doc.createElement("input");
+        inputorganism.type = "hidden";
+        inputorganism.setAttribute("value", "Generic");
+        label.appendChild(inputorganism);
+
+        var inputdatatype = doc.createElement("input");
+        inputdatatype.type = "hidden";
+        inputdatatype.setAttribute("value", "Generic");
+        label.appendChild(inputdatatype);
+
+        var hoverimage = doc.createElement("img");
+        hoverimage.className = "dataspacehoverimage";
+        hoverimage.src = "http://networks.systemsbiology.net/static/images/list-add.png";
+        //label.appendChild(hoverimage);
+        li.appendChild(label);
+    }
+}
+
+
 function InjectWorkflowData()
 {
     dump("\nInjecting data to workflow space...\n");
@@ -193,47 +243,29 @@ function InjectWorkflowData()
          //header.innerHTML = doc.title;
          //dataspacediv.appendChild(header);
          try {
-             var ul =  doc.getElementById("ulcaptureddata");
+             var ul =  doc.getElementById("ulGeneric");
              for (var lindex = 0; lindex < FG_collectedData.length; lindex++) {
-                var li = doc.createElement("li");
-                li.className = "licaptureddata";
-                ul.appendChild(li);
-                var label = doc.createElement("label");
-                label.className = "dataspacelabel";
-                var checkbox = doc.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.className = "dataspacecheckbox";
-                checkbox.name = "checkboxCapturedData";
-                label.appendChild(checkbox);
-                var url = FG_collectedData[lindex];
-                dump("\nurl: " + url);
-                dump("\nurl nodename: " + url.nodeName);
-                var urlclone = url.cloneNode(true);
-                label.appendChild(urlclone);
-
-                var inputdataid = doc.createElement("input");
-                inputdataid.type = "hidden";
-                inputdataid.setAttribute("value", "");
-                label.appendChild(inputdataid);
-
-                var inputorganism = doc.createElement("input");
-                inputorganism.type = "hidden";
-                inputorganism.setAttribute("value", "Generic");
-                label.appendChild(inputorganism);
-
-                var inputdatatype = doc.createElement("input");
-                inputdatatype.type = "hidden";
-                inputdatatype.setAttribute("value", "Generic");
-                label.appendChild(inputdatatype);
-
-                var hoverimage = doc.createElement("img");
-                hoverimage.className = "dataspacehoverimage";
-                hoverimage.src = "http://networks.systemsbiology.net/static/images/list-add.png";
-                //label.appendChild(hoverimage);
-                li.appendChild(label);
+                  InsertData(FG_collectedData[lindex], ul);
                 //datadiv.appendChild(FG_collectedData[lindex]);
              }
              //dataspacediv.appendChild(datadiv);
+
+             for (var tindex = 0; tindex < FG_collectedTableData.length; tindex++) {
+                var tabledata = FG_collectedTableData[tindex];
+                dump("\nTable " + tindex);
+                if (tabledata != null) {
+                   for (var col = 0; col < tabledata.length; col++) {
+                        dump("\ncolumn " + col);
+                        var urls = tabledata[col];
+                        if (urls.length > 0) {
+                            for (var l = 0; l < urls.length; l++) {
+                                var url = urls[l];
+                                InsertData(url, ul);
+                            }
+                        }
+                   }
+                }
+             }
 
              // set the signal value to trigger the UI actions
              var inputsignal = doc.getElementById("inputDataSignal");
@@ -296,7 +328,7 @@ function FG_workflowDataExtract(elementID, elementType)
 {
       dump("\nExtracting data from page for " + elementType);
 
-      FG_collectedData = [];
+      FG_collectedData = new Array();
       var tables = [];
       var doc = gBrowser.contentDocument;
 
@@ -367,8 +399,12 @@ function FG_workflowDataExtract(elementID, elementType)
               }
               dump("\nFound " + tables.length + " tables\n");
 
+              FG_collectedTableData = new Array();
               for (var i = 0; i < tables.length; i++)  {
                   var curTable = tables[i];
+                  dump("\n\n New table " + i);
+                  FG_collectedTableData[i] = new Array();
+
                   // We try to find checkboxes. If we find checkboxes, the selected rows will be added.
                   // Otherwise, all the urls in the table will be added.
                   //var gatheredLinksInTable = [];
@@ -413,16 +449,20 @@ function FG_workflowDataExtract(elementID, elementType)
                              {
                                 var url = urls[j];
                                 dump("\nFound url: " + url + " node name " + url.nodeName + "\n");
-                                FG_collectedData.push(url);
+
+                                if (FG_collectedTableData[i][col] == null)
+                                    FG_collectedTableData[i][col] = new Array();
+                                FG_collectedTableData[i][col].push(url);
+                                //FG_collectedData.push(url);
                              }
                          }
                       }
                   }
               }
-              dump("\nGathered data length: " + FG_collectedData.length);
+              dump("\nGathered data length: " + (FG_collectedData.length + FG_collectedTableData.length));
           }
       }
-      if (FG_collectedData.length > 0) {
+      if (FG_collectedData.length > 0 || FG_collectedTableData.length > 0) {
            // We gathered data, now we send it to the workflow page
            dump("\nFind or create tab for url: " + FG_workflowPageUrl);
            FG_findOrCreateTabWithUrl(FG_workflowPageUrl);
