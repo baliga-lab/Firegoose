@@ -2,7 +2,6 @@
 var FG_workflowPageUrl = "http://poland:8000/workflow";
 //var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "wfdataspace";
-var FG_sendDataToWorkflow = false;
 var FG_collectedData = null;
 var FG_collectedTableData = null;
 
@@ -220,6 +219,12 @@ function InsertData(url, ul)
         inputdatatype.type = "hidden";
         inputdatatype.setAttribute("value", "Generic");
         label.appendChild(inputdatatype);
+
+
+        var inputuserid = doc.createElement("input");
+        inputuserid.type = "hidden";
+        inputuserid.setAttribute("value", "*");
+        label.appendChild(inputuserid);
 
         var hoverimage = doc.createElement("img");
         hoverimage.className = "dataspacehoverimage";
@@ -502,6 +507,44 @@ function FG_findWorkflowData(requestID)
     return null;
 }
 
+function HandleGaggleData(gaggleData, secondaryData)
+{
+    // Put the data to the holder and the broadcast chooser
+    //FG_gaggleDataHolder.put(gaggleData);
+    //FG_populateBroadcastChooser(gaggleData.getDescription());
+
+    // We get a string of concatenated subactions delimited by ';'
+    dump("SubAction: " + gaggleData.getSubAction() + "\n");
+    var subactions = gaggleData.getSubAction();
+    //var action = gaggleData.getWorkflowAction();
+    var data = (secondaryData != null) ? secondaryData : gaggleData;
+    if (subactions != null && subactions.length > 0)
+    {
+        FG_Current_WorkflowActions.push(data);
+        var actions = subactions.split(";");
+        for (var i = 0; i < actions.length; i++)
+        {
+            dump("Subaction: " + actions[i]);
+            if (actions[i] == "NONE")
+                continue;
+            //var data = gaggleData.getWorkflowActionData();
+            //if (data != null && data.length > 0)
+            newTab = FG_dispatchBroadcastToWebsite(data, actions[i]);
+            if (newTab != null)
+            {
+                var tabvalue = newTab.value;
+                tabvalue += (";;" + gaggleData.getRequestID());
+                newTab.value = tabvalue;
+                dump("\n\nFinal Tab value: " + newTab.value);
+                FG_Current_Tab = newTab;
+                //FG_setWorkflowUI(action);
+            }
+        }
+    }
+    else
+        FG_Workflow_InProgress = false;
+}
+
 function FG_WorkflowDataReceived(gaggleData, goose)
 {
     try
@@ -527,61 +570,38 @@ function FG_WorkflowDataReceived(gaggleData, goose)
                 if (actions[i] != null && actions[i] != "NONE" && actions[i].length > 0 )
                 {
                     var datastring = actions[i];
-                    newTab = getBrowser().addTab(actions[i]);
-                    getBrowser().selectedTab = newTab;
-                    if (newTab != null)
+                    if (datastring.toLowerCase().indexOf(".txt"))
                     {
-                        dump("Setting tab value: " + gaggleData.getRequestID());
-                        tabdata = gaggleData.getRequestID();
-                        newTab.value = tabdata;
-                        FG_Current_Tab = newTab;
-                        FG_setWorkflowUI(action);
+                        dump("\n\nHandling txt namelist...\n");
+                        var namelist = FG_Goose.ProcessTextFile(datastring);
+                        if (namelist != null)
+                        {
+                           dump("\n\nHandle namelist from txt: " + namelist);
+                           var deserializedData = new FG_GaggleDeserializedData(namelist, "Namelist");
+                           HandleGaggleData(gaggleData, deserializedData);
+                        }
                     }
-                }
-            }
-            FG_Current_WorkflowActions.push(gaggleData);
-            FG_Workflow_InProgress = false;
-        }
-        else
-        {
-            // This is a WorkflowAction (Contains gaggleData such as Network, Cluster, Namelist, etc and a subaction)
-            dump("SubAction: " + gaggleData.getSubAction() + "\n");
-
-            // Put the data to the holder and the broadcast chooser
-            //FG_gaggleDataHolder.put(gaggleData);
-            //FG_populateBroadcastChooser(gaggleData.getDescription());
-
-            // We get a string of concatenated subactions delimited by ';'
-            var subactions = gaggleData.getSubAction();
-            if (subactions != null && subactions.length > 0)
-            {
-                FG_Current_WorkflowActions.push(gaggleData);
-                var actions = subactions.split(";");
-                for (var i = 0; i < actions.length; i++)
-                {
-                    dump("Subaction: " + actions[i]);
-                    if (actions[i] == "NONE")
-                        continue;
-                    //var data = gaggleData.getWorkflowActionData();
-                    //if (data != null && data.length > 0)
-                    {
-                        // TODO: now workflowAction only passes one data element
-                        // We might extend it to multiple elements
-                        newTab = FG_dispatchBroadcastToWebsite(gaggleData, actions[i]);
+                    else {
+                        newTab = getBrowser().addTab(actions[i]);
+                        getBrowser().selectedTab = newTab;
                         if (newTab != null)
                         {
-                            var tabvalue = newTab.value;
-                            tabvalue += (";;" + gaggleData.getRequestID());
-                            newTab.value = tabvalue;
-                            dump("\n\nFinal Tab value: " + newTab.value);
+                            dump("Setting tab value: " + gaggleData.getRequestID());
+                            tabdata = gaggleData.getRequestID();
+                            newTab.value = tabdata;
                             FG_Current_Tab = newTab;
                             FG_setWorkflowUI(action);
                         }
                     }
                 }
             }
-            else
-                FG_Workflow_InProgress = false;
+            FG_Current_WorkflowActions.push(gaggleData, subactions);
+            FG_Workflow_InProgress = false;
+        }
+        else
+        {
+            // This is a WorkflowAction (Contains gaggleData such as Network, Cluster, Namelist, etc and a subaction)
+            HandleGaggleData(gaggleData, null);
         }
     }
     catch(e)

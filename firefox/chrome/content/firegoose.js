@@ -37,6 +37,7 @@ var FG_Current_Tab;
 var FG_Current_GaggleData = null;
 var FG_Current_WebHandlerReportUrl = null; // A url of a web handler (e.g. EMBL String) to generate the report data
 var FG_Goose = null;
+var FG_sendDataToWorkflow = false;
 
 // these keep track of the last value this window has seen
 // from the goose java class. We poll the goose asking if
