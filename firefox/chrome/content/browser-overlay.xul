@@ -71,7 +71,7 @@
 
     <html:embed id ="DummyApplet" type="application/x-java-applet;version=1.6"
                 code="GaggleFiregooseApplet.class"
-                archive="http://neworks.systemsbiology.net/static/lib/GaggleFiregooseApplet2007.jar, http://networks.systemsbiology.net/static/lib/firegoose-deps.jar"
+                archive="http://gaggle.systemsbiology.org/docs/geese/firegoose/GaggleFiregooseApplet2007.jar, http://gaggle.systemsbiology.org/docs/geese/firegoose/firegoose-deps.jar"
                 MAYSCRIPT="true" width="0" height="0" />
 </html:div>
 
