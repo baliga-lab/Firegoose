@@ -27,13 +27,13 @@ var javaFiregooseLoader = {
 
 	init: function() {
 		dump("initializing JavaFiregooseLoader...\n");
-		dump("Java version: " + java.lang.System.getProperty("java.version") + "\n");
+		//dump("Java version: " + java.lang.System.getProperty("java.version") + "\n");
 		
 		// maybe this is easier?
 		// this.stringClass = java.lang.System.getProperty("java.version").getClass();
 
 		// contortions necessary to get a Java array of strings to pass to Firegoose.
-		try {
+		/*try {
 			this.stringClass = (new java.lang.String("")).getClass();
 		}
 		catch (e) {
@@ -45,7 +45,7 @@ var javaFiregooseLoader = {
 			catch(e1) {
 				dump("Error creating string array: " + e1 + "\n");
 			}
-		}
+		} */
 
 		// create our class loader
 		var jars = ["firegoose-deps.jar", "firefoxClassLoader.jar"];
@@ -53,6 +53,7 @@ var javaFiregooseLoader = {
 
 		// create the goose object
 		//this._goose = this._createJavaFiregooseObject();
+		dump(FG_Goose);
 		this._goose = FG_Goose;
 	},
 
@@ -63,7 +64,10 @@ var javaFiregooseLoader = {
 
 	createNetwork: function() {
 		dump("create Network\n");
-		return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Network").callConstructor([]);
+		var network = FG_Goose.getObject("org.systemsbiology.gaggle.core.datatypes.Network");
+        dump("\nNetwork " + interaction);
+        return network;
+		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Network").callConstructor([]);
 	},
 
 	/**
@@ -71,13 +75,19 @@ var javaFiregooseLoader = {
 	 * the type of interaction the new edge represents.
 	 */
 	createInteraction: function(source, target, interactionType) {
-		var args = this.toJavaStringArray([source, target, interactionType]);
-		return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Interaction").callConstructor(args);
+		//var args = this.toJavaStringArray([source, target, interactionType]);
+		var interaction = FG_Goose.createInteraction(source, target, interactionType);
+        dump("\nInteraction " + interaction);
+        return interaction;
+		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Interaction").callConstructor(args);
 	},
 
 	createDataMatrix: function() {
 		dump("create DataMatrix\n");
-		return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.DataMatrix").callConstructor([]);
+        var matrix = FG_Goose.getObject("org.systemsbiology.gaggle.core.datatypes.DataMatrix");
+        dump("\n" + matrix);
+        return matrix;
+		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.DataMatrix").callConstructor([]);
 	},
 
 	/**
@@ -91,44 +101,58 @@ var javaFiregooseLoader = {
 	 * See toJavaStringArray.
 	 */
 	toJavaArray: function(arrayClass, a) {
-		var javaArray = java.lang.reflect.Array.newInstance(arrayClass, a.length);
-		for (var i = 0; i < a.length; i++) {
-			var element = a[i];
-			java.lang.reflect.Array.set(javaArray, i, element);
-		}
-		return javaArray;
-	},
+        //var javaArray = java.lang.reflect.Array.newInstance(arrayClass, a.length);
+        javaArray = FG_Goose.getJavaArray(arrayClass, a.length);
+        for (var i = 0; i < a.length; i++) {
+            var element = a[i];
+            //java.lang.reflect.Array.set(javaArray, i, element);
+            FG_Goose.setArrayElement(javaArray, i, element);
+        }
+        return javaArray;
+    },
 
 	toJavaStringArray: function(a) {
-		var javaArray = java.lang.reflect.Array.newInstance(this.stringClass, a.length);
-		for (var i = 0; i < a.length; i++) {
-			var element = a[i];
-			java.lang.reflect.Array.set(javaArray, i, element);
-		}
-		return javaArray;
-	},
+        dump("\nLength of string array: " + a.length + "\n");
+        //var javaArray = java.lang.reflect.Array.newInstance(this.stringClass, a.length);
+        var javaArray = FG_Goose.getJavaArray("java.lang.String", a.length);
+        for (var i = 0; i < a.length; i++) {
+            var element = a[i];
+            //java.lang.reflect.Array.set(javaArray, i, element);
+            FG_Goose.setArrayElement(javaArray, i, element);
+        }
+        return javaArray;
+    },
 
 	/**
 	 * Converts a 2D array of js Floats to a 2D java array of doubles.
 	 */
 	toJavaDoubleMatrix: function(data) {
-		dump("converting...\n");
-		var dimensions = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 2);
-		dimensions[0] = data.length;
-		dump("length = " + data.length + "\n");
-		var java2dArrayOfDouble = java.lang.reflect.Array.newInstance(java.lang.Double.TYPE, dimensions);
+        dump("converting...\n");
+        //var dimensions = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 2);
+        //dimensions[0] = data.length;
+        dump("row = " + data.length + " column = " + data[0].length + "\n");
+        var rows = data.length;
+        var columns = data[0].length;
+        //var java2dArrayOfDouble = java.lang.reflect.Array.newInstance(java.lang.Double.TYPE, dimensions);
+        var java2dArrayOfDouble = FG_Goose.get2DJavaArrayDouble(rows, columns);
 
-		for (var i=0; i < data.length; i++) {
-			dump("data[i] = " + data[i] + "\n");
-			//java2dArrayOfDouble[i] = this.toJavaArray(java.lang.Double.TYPE, data[i]);
-			java2dArrayOfDouble[i] = data[i];
-		}
-		return java2dArrayOfDouble;
-	},
-
-	printToJavaConsole: function(s) {
-		this._goose.println(s);
-	},
+        for (var i=0; i < rows; i++) {
+            dump("\ndata[i] = " + data[i] + "\n");
+            dump("\narray[i]: " + java2dArrayOfDouble[i]);
+            //java2dArrayOfDouble[i] = this.toJavaArray(java.lang.Double.TYPE, data[i]);
+            for (var j = 0; j < columns; j++)
+            {
+                dump("\nData[" + i + ", " + j + "] = " + data[i][j]);
+                //var doublevalue = FG_Goose.getDoubleObjectFromDouble(data[i][j].toFixed(10));
+                //dump("\nDouble value: " + doublevalue);
+                FG_Goose.set2DJavaArrayDoubleValue(java2dArrayOfDouble, i, j, data[i][j].toFixed(10));
+                dump("\nAssigned value: " + java2dArrayOfDouble[i][j]);
+                //java2dArrayOfDouble[i] = data[i];
+            }
+        }
+        dump("\nReturned...\n")
+        return java2dArrayOfDouble;
+    },
 
 	/**
 	 * test our ability to create and communicate with java objects.
