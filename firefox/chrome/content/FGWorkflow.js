@@ -1,7 +1,7 @@
-//var FG_workflowPageUrl = "http://localhost:8000/workflow";
-var FG_workflowPageUrl = "http://poland:8000/workflow";
+var FG_workflowPageUrl = "http://localhost:8000/workflow";
+//var FG_workflowPageUrl = "http://poland:8000/workflow";
 //var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
-var FG_workflowDataspaceID = "wfdataspace";
+var FG_workflowDataspaceID = "tblUserFiles";
 var FG_collectedData = null;
 var FG_collectedTableData = null;
 
@@ -181,56 +181,98 @@ function FG_findOrCreateTabWithUrl(url)
     return urltab;
 }
 
-function InsertData(url, ul)
+function InsertData(url, targettable)
 {
-    if (url != null) {
+    if (url != null && targettable != null) {
+        dump("\nInserting " + url + " to " + targettable + "with " + targettable.rows.length + " rows\n");
         var doc = gBrowser.contentDocument;
+        var row = targettable.insertRow();
+        dump("\nRow " + row);
+        //targettable.appendChild(row);
+        //var td0 = document.createElement("td");
+        //$(row).append($(td0));
+        //var checkbox = document.createElement("input");
+        //checkbox.setAttribute("type", "checkbox");
+        //$(td0).append($(checkbox));
 
-        var li = doc.createElement("li");
-        li.className = "licaptureddata";
-        ul.appendChild(li);
-
+        var td1 = row.insertCell(0);// doc.createElement("td");
+        //row.appendChild(td1);
         var label = doc.createElement("label");
         label.className = "dataspacelabel";
+        td1.appendChild(label);
+
         var checkbox = doc.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "dataspacecheckbox";
-        checkbox.name = "checkboxCapturedData";
+        checkbox.setAttribute("type", "checkbox");
         label.appendChild(checkbox);
-        dump("\nurl: " + url);
-        dump("\nurl nodename: " + url.nodeName);
-        var urlclone = url.cloneNode(true);
-        label.appendChild(urlclone);
 
-        var inputdataid = doc.createElement("input");
-        inputdataid.type = "hidden";
-        inputdataid.setAttribute("value", "");
-        label.appendChild(inputdataid);
-
-        // Captured data is set to be of both Generic organisms and
-        // Generic data types, so they will always show up in the
-        // workflow data space
-        var inputorganism = doc.createElement("input");
-        inputorganism.type = "hidden";
-        inputorganism.setAttribute("value", "Generic");
-        label.appendChild(inputorganism);
-
-        var inputdatatype = doc.createElement("input");
-        inputdatatype.type = "hidden";
-        inputdatatype.setAttribute("value", "Generic");
-        label.appendChild(inputdatatype);
+        try {
+            var urlclone = url.cloneNode(true);
+            dump("\nCloned url " + urlclone);
+            label.appendChild(urlclone);
+        }
+        catch (e)
+        {
+            var link = doc.createElement("a");
+            link.text = url;
+            link.href =  url;
+            dump("\nURL " + link);
+            label.appendChild(link);
+        }
 
 
-        var inputuserid = doc.createElement("input");
-        inputuserid.type = "hidden";
-        inputuserid.setAttribute("value", "*");
-        label.appendChild(inputuserid);
+        var idinput = doc.createElement("input");
+        idinput.setAttribute("type", "hidden");
+        idinput.setAttribute("value", "");
+        label.appendChild(idinput);
 
-        var hoverimage = doc.createElement("img");
-        hoverimage.className = "dataspacehoverimage";
-        hoverimage.src = "http://networks.systemsbiology.net/static/images/list-add.png";
+        //alert(linkpair['organism']);
+        var organisminput = doc.createElement("input");
+        organisminput.setAttribute("type", "hidden");
+        organisminput.setAttribute("value", "Generic");
+        label.appendChild(organisminput);
+
+        var useridinput = doc.createElement("input");
+        useridinput.setAttribute("type", "hidden");
+        useridinput.setAttribute("value", "*");
+        label.appendChild(useridinput);
+
+        var td2 = row.insertCell(1); //doc.createElement("td");
+        //row.appendChild(td2);
+        td2.innerHTML = "Generic";
+
+        var td3 = row.insertCell(2); // doc.createElement("td");
+        //row.appendChild(td3);
+        td3.innerHTML = "Captured data";
+        dump(td3.innerHTML);
+
+        var td4 = row.insertCell(3); //document.createElement("td");
+        //row.appendChild(td4);
+        var select = doc.createElement("select");
+        //select.onchange = "javascript:DataOperationSelected(this);";
+        select.className = "firegooseInsertedSelect"
+        td4.appendChild(select);
+        var option0 = doc.createElement("option");
+        option0.value = "0";
+        option0.innerHTML = "Select an operation";
+        select.appendChild(option0);
+        var option1 = doc.createElement("option");
+        option1.value = "1";
+        option1.innerHTML = "Open";
+        select.appendChild(option1);
+        var option2 = doc.createElement("option");
+        option2.value = "2";
+        option2.innerHTML = "QuickView";
+        select.appendChild(option2);
+        var option3 = doc.createElement("option");
+        option3.value = "3";
+        option3.innerHTML = "Download";
+        select.appendChild(option3);
+
+        //var hoverimage = doc.createElement("img");
+        //hoverimage.className = "dataspacehoverimage";
+        //hoverimage.src = "http://networks.systemsbiology.net/static/images/list-add.png";
         //label.appendChild(hoverimage);
-        li.appendChild(label);
+        //li.appendChild(label);
     }
 }
 
@@ -248,9 +290,11 @@ function InjectWorkflowData()
          //header.innerHTML = doc.title;
          //dataspacediv.appendChild(header);
          try {
-             var ul =  doc.getElementById("ulGeneric");
+             //var ul =  doc.getElementById("ulGeneric");
+             var datatable = doc.getElementById("tblUserFiles");
+             dump("inserting target " + datatable);
              for (var lindex = 0; lindex < FG_collectedData.length; lindex++) {
-                  InsertData(FG_collectedData[lindex], ul);
+                  InsertData(FG_collectedData[lindex], datatable);
                 //datadiv.appendChild(FG_collectedData[lindex]);
              }
              //dataspacediv.appendChild(datadiv);
@@ -262,10 +306,13 @@ function InjectWorkflowData()
                    for (var col = 0; col < tabledata.length; col++) {
                         dump("\ncolumn " + col);
                         var urls = tabledata[col];
-                        if (urls.length > 0) {
-                            for (var l = 0; l < urls.length; l++) {
-                                var url = urls[l];
-                                InsertData(url, ul);
+                        if (urls != null) {
+                            //dump("\nurl array: " + urls);
+                            if (urls.length > 0) {
+                                for (var l = 0; l < urls.length; l++) {
+                                    var url = urls[l];
+                                    InsertData(url, datatable);
+                                }
                             }
                         }
                    }
@@ -337,136 +384,158 @@ function FG_workflowDataExtract(elementID, elementType)
       var tables = [];
       var doc = gBrowser.contentDocument;
 
+      var broadcastChooser = document.getElementById("fg_broadcastChooser");
+      dump("\nbroadcastChooser value " + broadcastChooser.selectedItem.getAttribute("value"));
+      var broadcastData = FG_gaggleDataHolder.get(broadcastChooser.selectedItem.getAttribute("value"));
+      dump(broadcastData);
+      if (broadcastData != null)
+      {
+          dump("\nExtract gaggle data\n");
+          var namelist = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : broadcastData.getData();
+          dump("\nExtracted Namelist " + namelist);
+          if (namelist != null)
+          {
+             for (var i = 0; i < namelist.length; i++)
+             {
+                 dump("Name " + namelist[i]);
+                 FG_collectedData.push(namelist[i]);
+             }
+          }
+      }
+      else {
       // We first check if there are any selected text
       //alert(document.commandDispatcher.focusedElement);
-      var focusedElement = document.commandDispatcher.focusedElement;
-      var elements1;
-      var elements2;
-      if (null != focusedElement)
-      {
-          try
+          var focusedElement = document.commandDispatcher.focusedElement;
+          var elements1;
+          var elements2;
+          if (null != focusedElement)
           {
-              //alert(getSelectedElements(focusedElement, "a"));
-              elements1 = getSelectedElements(focusedElement, "a");
-              dump("\nSelected a tags: " + elements1);
+              try
+              {
+                  //alert(getSelectedElements(focusedElement, "a"));
+                  elements1 = getSelectedElements(focusedElement, "a");
+                  dump("\nSelected a tags: " + elements1);
 
+              }
+              catch(e)
+              {
+                  trywindow = true;
+              }
           }
-          catch(e)
+          else
           {
               trywindow = true;
           }
-      }
-      else
-      {
-          trywindow = true;
-      }
 
-      if (trywindow)
-      {
-          var focusedWindow = document.commandDispatcher.focusedWindow;
-          //alert(focusedWindow);
-          var winWrapper = new XPCNativeWrapper(focusedWindow, 'document');
-          dump("\nWinWrapper: " + winWrapper);
-          var Selection = winWrapper.getSelection();
-          dump("\n Section: " + Selection);
-          if (Selection != null) {
-              elements2 = getSelectedElements(winWrapper, "a");
-              dump("\nSelected elements: " + elements2);
-          }
-          //parseSelection(Selection);
-      }
-
-      if (elements1 != null && elements1.length > 0)
-      {
-         for (var i = 0; i < elements1.length; i++) {
-            dump("\nLink: " + elements1[i]);
-            FG_collectedData.push(elements1[i]);
-         }
-      }
-
-      if (elements2 != null && elements2.length > 0)
-      {
-         for (var j = 0; j < elements2.length; j++) {
-            dump("\nLink: " + elements2[j]);
-            FG_collectedData.push(elements2[j]);
-         }
-      }
-
-      if (FG_collectedData.length == 0) {
-          // If no selected text, we find all the tables on a page and get all the hypertext links in the table
-          if (elementType == "table") {
-              if (elementID.length == 0)
-                  tables = doc.getElementsByTagName("table");
-              else {
-                 var table = doc.getElementById(elementID);
-                 if (table != null)
-                     tables.push(table);
+          if (trywindow)
+          {
+              var focusedWindow = document.commandDispatcher.focusedWindow;
+              //alert(focusedWindow);
+              var winWrapper = new XPCNativeWrapper(focusedWindow, 'document');
+              dump("\nWinWrapper: " + winWrapper);
+              var Selection = winWrapper.getSelection();
+              dump("\n Section: " + Selection);
+              if (Selection != null) {
+                  elements2 = getSelectedElements(winWrapper, "a");
+                  dump("\nSelected elements: " + elements2);
               }
-              dump("\nFound " + tables.length + " tables\n");
+              //parseSelection(Selection);
+          }
 
-              FG_collectedTableData = new Array();
-              for (var i = 0; i < tables.length; i++)  {
-                  var curTable = tables[i];
-                  dump("\n\n New table " + i);
-                  FG_collectedTableData[i] = new Array();
+          if (elements1 != null && elements1.length > 0)
+          {
+             for (var i = 0; i < elements1.length; i++) {
+                dump("\nLink: " + elements1[i]);
+                FG_collectedData.push(elements1[i]);
+             }
+          }
 
-                  // We try to find checkboxes. If we find checkboxes, the selected rows will be added.
-                  // Otherwise, all the urls in the table will be added.
-                  //var gatheredLinksInTable = [];
-                  var row = 0;
-                  var col = 0;
-                  var tablerows = curTable.getElementsByTagName("tr");
-                  dump("\nFound " + tablerows.length + " rows\n");
-                  if (tablerows == null || tablerows.length == 0)
-                  {
-                      var rtbody = curTable.getElementsByTagName("tbody");
-                      dump("\nFound " + rtbody.length + " tbody\n");
-                      if (rtbody != null && rtbody.length > 0)
-                      {
-                          var tbody = rtbody[0];
-                          tablerows = tbody.getElementsByTagName("tr");
-                          dump("\nFound " + tablerows.length + " rows\n");
-                      }
+          if (elements2 != null && elements2.length > 0)
+          {
+             for (var j = 0; j < elements2.length; j++) {
+                dump("\nLink: " + elements2[j]);
+                FG_collectedData.push(elements2[j]);
+             }
+          }
+
+          if (FG_collectedData.length == 0) {
+              // If no selected text, we find all the tables on a page and get all the hypertext links in the table
+              if (elementType == "table") {
+                  if (elementID.length == 0)
+                      tables = doc.getElementsByTagName("table");
+                  else {
+                     var table = doc.getElementById(elementID);
+                     if (table != null)
+                         tables.push(table);
                   }
-                  for (var row = 0; row < tablerows.length; row++) {
-                      var currow = tablerows[row];
-                      var rowchecked = false;
-                      var checkboxFound = false;
-                      var cells = currow.getElementsByTagName("td");
-                      dump("\nFound " + cells.length + " cells\n");
-                      for (var col = 0; col < cells.length; col++) {
-                         var cell = cells[col];
-                         if (col == 0) {
-                             var checkboxes = cell.getElementsByTagName("input");
-                             if (checkboxes != null && checkboxes.length > 0 && checkboxes[0].type == "checkbox") {
-                                 // we find a checked checkbox, now we find the url on that row
-                                 checkboxFound = true;
-                                 var checkbox = checkboxes[0];
-                                 dump("\ncheckbox " + checkbox.checked);
-                                 if (checkbox.checked) {
-                                     rowchecked = true;
+                  dump("\nFound " + tables.length + " tables\n");
+
+                  FG_collectedTableData = new Array();
+                  for (var i = 0; i < tables.length; i++)  {
+                      var curTable = tables[i];
+                      dump("\n\n New table " + i);
+                      FG_collectedTableData[i] = new Array();
+
+                      // We try to find checkboxes. If we find checkboxes, the selected rows will be added.
+                      // Otherwise, all the urls in the table will be added.
+                      //var gatheredLinksInTable = [];
+                      var row = 0;
+                      var col = 0;
+                      var tablerows = curTable.getElementsByTagName("tr");
+                      dump("\nFound " + tablerows.length + " rows\n");
+                      if (tablerows == null || tablerows.length == 0)
+                      {
+                          var rtbody = curTable.getElementsByTagName("tbody");
+                          dump("\nFound " + rtbody.length + " tbody\n");
+                          if (rtbody != null && rtbody.length > 0)
+                          {
+                              var tbody = rtbody[0];
+                              tablerows = tbody.getElementsByTagName("tr");
+                              dump("\nFound " + tablerows.length + " rows\n");
+                          }
+                      }
+                      for (var row = 0; row < tablerows.length; row++) {
+                          var currow = tablerows[row];
+                          var rowchecked = false;
+                          var checkboxFound = false;
+                          var cells = currow.getElementsByTagName("td");
+                          dump("\nFound " + cells.length + " cells\n");
+                          for (var col = 0; col < cells.length; col++) {
+                             var cell = cells[col];
+                             if (col == 0) {
+                                 var checkboxes = cell.getElementsByTagName("input");
+                                 if (checkboxes != null && checkboxes.length > 0 && checkboxes[0].type == "checkbox") {
+                                     // we find a checked checkbox, now we find the url on that row
+                                     checkboxFound = true;
+                                     var checkbox = checkboxes[0];
+                                     dump("\ncheckbox " + checkbox.checked);
+                                     if (checkbox.checked) {
+                                         rowchecked = true;
+                                     }
                                  }
                              }
-                         }
-                         if ((checkboxFound && rowchecked) || !checkboxFound) {
-                             var urls = cell.getElementsByTagName("a");
-                             for (var j = 0; j < urls.length; j++)
-                             {
-                                var url = urls[j];
-                                dump("\nFound url: " + url + " node name " + url.nodeName + "\n");
+                             if ((checkboxFound && rowchecked) || !checkboxFound) {
+                                 var urls = cell.getElementsByTagName("a");
+                                 for (var j = 0; j < urls.length; j++)
+                                 {
+                                    var url = urls[j];
+                                    dump("\nFound url: " + url + " node name " + url.nodeName + "\n");
 
-                                if (FG_collectedTableData[i][col] == null)
-                                    FG_collectedTableData[i][col] = new Array();
-                                FG_collectedTableData[i][col].push(url);
-                                //FG_collectedData.push(url);
+                                    if (FG_collectedTableData[i][col] == null)
+                                        FG_collectedTableData[i][col] = new Array();
+                                    FG_collectedTableData[i][col].push(url);
+                                    //dump("\nSaved url to " + FG_collectedTableData[i][col]);
+                                    //FG_collectedData.push(url);
+                                 }
                              }
-                         }
+                          }
                       }
                   }
+                  dump("\nGathered data length: " + (FG_collectedData.length + FG_collectedTableData.length));
               }
-              dump("\nGathered data length: " + (FG_collectedData.length + FG_collectedTableData.length));
           }
       }
+
       if (FG_collectedData.length > 0 || FG_collectedTableData.length > 0) {
            // We gathered data, now we send it to the workflow page
            dump("\nFind or create tab for url: " + FG_workflowPageUrl);

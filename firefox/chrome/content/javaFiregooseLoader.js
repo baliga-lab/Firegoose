@@ -78,8 +78,9 @@ var javaFiregooseLoader = {
 	 * the type of interaction the new edge represents.
 	 */
 	createInteraction: function(source, target, interactionType) {
-		var args = this.toJavaStringArray([source, target, interactionType]);
-		var interaction = FG_Goose.getObject("org.systemsbiology.gaggle.core.datatypes.Interaction");
+		//var args = this.toJavaStringArray([source, target, interactionType]);
+		//var interaction = FG_Goose.getObject("org.systemsbiology.gaggle.core.datatypes.Interaction");
+		var interaction = FG_Goose.createInteraction(source, target, interactionType);
 		dump("\nInteraction " + interaction);
 		return interaction;
 		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.Interaction").callConstructor(args);

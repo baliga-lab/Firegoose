@@ -251,6 +251,7 @@ var FG_pageListener = {
 		if (aEvent.originalTarget.nodeName == "#document") {
 			dump("on page load event\n");
 			var doc = aEvent.originalTarget;
+			var win = doc.defaultView;
             var clearPageData = true;
             
             // FG_trace("page load event:");
@@ -308,7 +309,10 @@ var FG_pageListener = {
     			// to the page
     			if (FG_sendDataToWorkflow)
     			{
-    			    InjectWorkflowData();
+    			    // we have to wait until all the page is loaded
+    			    // insert rows to table doesn't work if the table is not loaded
+                    win.setTimeout(InjectWorkflowData, 2000);
+    			    //InjectWorkflowData();
     			    FG_sendDataToWorkflow = false;
     			}
             } catch (error) {

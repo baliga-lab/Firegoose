@@ -122,7 +122,13 @@ FG_GaggleData.prototype.setConvertToJavaOnGetData = function() {
 }
 
 FG_GaggleData.prototype.getDataAsNameList = function() {
-	if (this._type=='Network') {
+    dump("\nGetDataAsNameList type " + this._type);
+    if (this._type == "NameList")
+    {
+        dump("\nNamelist " + this.getData());
+        return this.getData();
+    }
+	else if (this._type=='Network') {
 		var network = this.getData();
 		if (network) {
 		    if (network.getNodes != undefined)
