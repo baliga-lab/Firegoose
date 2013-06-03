@@ -341,6 +341,7 @@ var gaggleMicroformat = {
 	 * Read a cluster from two html lists
 	 */
 	readCluster: function(node) {
+	    dump("\n\nReading cluster...\n");
 		var results = new Object();
 
 		var element = ufmt.first(ufmt.getElementsByClassName(node, "gaggle-rowNames"));

@@ -94,6 +94,23 @@ var javaFiregooseLoader = {
 		//return this._packages.getClass("org.systemsbiology.gaggle.core.datatypes.DataMatrix").callConstructor([]);
 	},
 
+	createCluster: function(name, species, jsCluster) {
+	    dump("\nCreate Cluster\n");
+	    var cluster = FG_Goose.createCluster(name, species, jsCluster.rowNames, jsCluster.columnNames);
+	    dump("\n" + cluster);
+	    return cluster;
+	},
+
+	createNameList: function(name, species, jsNameList) {
+	    dump("\nCreate NameList " + jsNameList + "\n");
+	    var namelist = FG_Goose.createNameList(name, species, jsNameList);
+	    dump("\n" + namelist);
+	    return namelist;
+	},
+
+
+
+
 	/**
 	 * Convert a javascript array 'a' to an array of arrayClass. For example, to create
 	 *  an array of the primitive type double from a js array of floats

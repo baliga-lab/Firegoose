@@ -298,25 +298,26 @@ function InjectWorkflowData()
                 //datadiv.appendChild(FG_collectedData[lindex]);
              }
              //dataspacediv.appendChild(datadiv);
-
-             for (var tindex = 0; tindex < FG_collectedTableData.length; tindex++) {
-                var tabledata = FG_collectedTableData[tindex];
-                dump("\nTable " + tindex);
-                if (tabledata != null) {
-                   for (var col = 0; col < tabledata.length; col++) {
-                        dump("\ncolumn " + col);
-                        var urls = tabledata[col];
-                        if (urls != null) {
-                            //dump("\nurl array: " + urls);
-                            if (urls.length > 0) {
-                                for (var l = 0; l < urls.length; l++) {
-                                    var url = urls[l];
-                                    InsertData(url, datatable);
+             if (FG_collectedTableData != null) {
+                 for (var tindex = 0; tindex < FG_collectedTableData.length; tindex++) {
+                    var tabledata = FG_collectedTableData[tindex];
+                    dump("\nTable " + tindex);
+                    if (tabledata != null) {
+                       for (var col = 0; col < tabledata.length; col++) {
+                            dump("\ncolumn " + col);
+                            var urls = tabledata[col];
+                            if (urls != null) {
+                                //dump("\nurl array: " + urls);
+                                if (urls.length > 0) {
+                                    for (var l = 0; l < urls.length; l++) {
+                                        var url = urls[l];
+                                        InsertData(url, datatable);
+                                    }
                                 }
                             }
-                        }
-                   }
-                }
+                       }
+                    }
+                 }
              }
 
              // set the signal value to trigger the UI actions
@@ -387,19 +388,31 @@ function FG_workflowDataExtract(elementID, elementType)
       var broadcastChooser = document.getElementById("fg_broadcastChooser");
       dump("\nbroadcastChooser value " + broadcastChooser.selectedItem.getAttribute("value"));
       var broadcastData = FG_gaggleDataHolder.get(broadcastChooser.selectedItem.getAttribute("value"));
-      dump(broadcastData);
-      if (broadcastData != null)
+      var data = null;
+      try {
+        data = broadcastData.getData();
+      }
+      catch (e) {
+        dump("\nFailed to get data " + e);
+        data = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : null;
+      }
+      dump("\n\ndata class: " + typeof(data));
+      if (data != null)
       {
           dump("\nExtract gaggle data\n");
-          var namelist = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : broadcastData.getData();
-          dump("\nExtracted Namelist " + namelist);
-          if (namelist != null)
+          //var namelist = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : broadcastData.getData();
+          var goose = javaFiregooseLoader.getGoose();
+          if (goose != null)
           {
-             for (var i = 0; i < namelist.length; i++)
-             {
-                 dump("Name " + namelist[i]);
-                 FG_collectedData.push(namelist[i]);
-             }
+              var savedfilename = goose.saveGaggleData(data, "");
+              dump("\nSaved gaggle data file " + savedfilename);
+              if (savedfilename != null)
+              {
+                 var dataurl = doc.createElement("a");
+                 dataurl.text = broadcastChooser.selectedItem.getAttribute("value");
+                 dataurl.href = savedfilename;
+                 FG_collectedData.push(dataurl);
+              }
           }
       }
       else {

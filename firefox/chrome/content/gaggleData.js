@@ -89,28 +89,40 @@ FG_GaggleData.prototype.setConvertToJavaOnGetData = function() {
 	var oldGetData = this.getData;
 	if (!oldGetData._already_setConvertToJavaOnGetData) {
 		this.getData = function() {
-			dump("GaggleData.getData()");
+			dump("\nGaggleData.getData()");
 
 			// getData may already be overridden to read data lazily
 		    var data = oldGetData.call(this);
+            dump("\nold get data returns " + data);
 
 			if (!data)
 				return null;
 	
 			// is this a good way to detect whether data is a java object?
 			if (data.getClass) {
+			    dump("\nReturn by getClass\n");
 				return data;
 			}
 			else {
 				// if we call getSpecies() here, we can't call getData from within
 				// getSpecies or we set up an infinite recursion. So, how to get
 				// a sample name for guessing species?
+				dump("\n\njs type of data: " + this.getType());
 				if (this.getType() == "Network") {
-				    dump("Converting network to Java object....");
+				    dump("\nConverting network to Java object....\n");
 					this._data = FG_GaggleData.jsToJavaNetwork(this.getName(), this.getSpecies(), data);
 				}
 				else if (this.getType() == "DataMatrix") {
+				    dump("\nConverting data matrix to Java object....\n");
 					this._data = FG_GaggleData.jsToJavaDataMatrix(this.getName(), this.getSpecies(), data);
+				}
+				else if (this.getType() == "Cluster") {
+				    dump("\nConverting cluster to Java object " + this.getName() + " " + this.getSpecies());
+				    this._data = FG_GaggleData.jsToJavaCluster(this.getName(), this.getSpecies(), data);
+				}
+				else if (this.getType() == "NameList") {
+				    dump("\nConverting namelist to Java object " + this.getName() + " " + this.getSpecies());
+				    this._data = FG_GaggleData.jsToJavaNameList(this.getName(), this.getSpecies(), data);
 				}
 				return this._data;
 			}
@@ -217,7 +229,18 @@ FG_GaggleData.jsToJavaNetwork = function(name, species, jsNetwork) {
 	}
 
 	return network;
-}
+};
+
+FG_GaggleData.jsToJavaCluster = function(name, species, jsCluster) {
+    dump("\nCreating Java Cluster "); // + jsCluster.rowNames + " " + jsCluster.columnNames);
+    return javaFiregooseLoader.createCluster(name, species, jsCluster);
+};
+
+FG_GaggleData.jsToJavaNameList = function(name, species, jsNameList) {
+    dump("\nCreating Java NameList "); // + jsNameList);
+    return javaFiregooseLoader.createNameList(name, species, jsNameList);
+};
+
 
 FG_GaggleData.prototype.setRequestID = function(requestID)
 {
