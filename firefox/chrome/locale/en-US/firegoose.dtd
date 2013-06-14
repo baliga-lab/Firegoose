@@ -1,5 +1,5 @@
-<!ENTITY firegoose.version "1.0.914">
-<!ENTITY firegoose.build.date "2013-06-03 13:55:36">
+<!ENTITY firegoose.version "1.0.932">
+<!ENTITY firegoose.build.date "2013-06-12 10:18:25">
 
 <!ENTITY firegoose.hello.label "Hello">
 <!ENTITY firegoose.jvm_info.label "JVM Info">

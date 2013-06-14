@@ -1,5 +1,5 @@
-var FG_workflowPageUrl = "http://localhost:8000/workflow";
-//var FG_workflowPageUrl = "http://poland:8000/workflow";
+//var FG_workflowPageUrl = "http://localhost:8000/workflow";
+var FG_workflowPageUrl = "http://poland:8000/workflow";
 //var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "tblUserFiles";
 var FG_collectedData = null;
@@ -186,7 +186,7 @@ function InsertData(url, targettable)
     if (url != null && targettable != null) {
         dump("\nInserting " + url + " to " + targettable + "with " + targettable.rows.length + " rows\n");
         var doc = gBrowser.contentDocument;
-        var row = targettable.insertRow();
+        var row = targettable.insertRow(-1);
         dump("\nRow " + row);
         //targettable.appendChild(row);
         //var td0 = document.createElement("td");
@@ -411,6 +411,9 @@ function FG_workflowDataExtract(elementID, elementType)
                  var dataurl = doc.createElement("a");
                  dataurl.text = broadcastChooser.selectedItem.getAttribute("value");
                  dataurl.href = savedfilename;
+                 dataurl.hostname = "";
+                 //dataurl.protocol = "file";
+                 dump("\nCreated url " + dataurl);
                  FG_collectedData.push(dataurl);
               }
           }
