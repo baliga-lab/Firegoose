@@ -1,5 +1,5 @@
-//var FG_workflowPageUrl = "http://localhost:8000/workflow";
-var FG_workflowPageUrl = "http://poland:8000/workflow";
+var FG_workflowPageUrl = "http://localhost:8000/workflow";
+//var FG_workflowPageUrl = "http://poland:8000/workflow";
 //var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "tblUserFiles";
 var FG_collectedData = null;
@@ -259,10 +259,13 @@ function InsertData(url, targettable)
         option1.value = "1";
         option1.innerHTML = "Open";
         select.appendChild(option1);
-        var option2 = doc.createElement("option");
-        option2.value = "2";
-        option2.innerHTML = "QuickView";
-        select.appendChild(option2);
+
+        //TODO add quick view back later
+        //var option2 = doc.createElement("option");
+        //option2.value = "2";
+        //option2.innerHTML = "QuickView";
+        //select.appendChild(option2);
+
         var option3 = doc.createElement("option");
         option3.value = "3";
         option3.innerHTML = "Download";
@@ -388,37 +391,43 @@ function FG_workflowDataExtract(elementID, elementType)
       var broadcastChooser = document.getElementById("fg_broadcastChooser");
       dump("\nbroadcastChooser value " + broadcastChooser.selectedItem.getAttribute("value"));
       var broadcastData = FG_gaggleDataHolder.get(broadcastChooser.selectedItem.getAttribute("value"));
-      var data = null;
-      try {
-        data = broadcastData.getData();
-      }
-      catch (e) {
-        dump("\nFailed to get data " + e);
-        data = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : null;
-      }
-      dump("\n\ndata class: " + typeof(data));
-      if (data != null)
+      var hasGaggleData = false;
+      if (broadcastData != null)
       {
-          dump("\nExtract gaggle data\n");
-          //var namelist = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : broadcastData.getData();
-          var goose = javaFiregooseLoader.getGoose();
-          if (goose != null)
+          var data = null;
+          try {
+            data = broadcastData.getData();
+          }
+          catch (e) {
+            dump("\nFailed to get data " + e);
+            data = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : null;
+          }
+          dump("\n\ndata class: " + typeof(data));
+          if (data != null)
           {
-              var savedfilename = goose.saveGaggleData(data, "");
-              dump("\nSaved gaggle data file " + savedfilename);
-              if (savedfilename != null)
+              dump("\nExtract gaggle data\n");
+              //var namelist = (broadcastData.getDataAsNameList != null) ? broadcastData.getDataAsNameList() : broadcastData.getData();
+              var goose = javaFiregooseLoader.getGoose();
+              if (goose != null)
               {
-                 var dataurl = doc.createElement("a");
-                 dataurl.text = broadcastChooser.selectedItem.getAttribute("value");
-                 dataurl.href = savedfilename;
-                 dataurl.hostname = "";
-                 //dataurl.protocol = "file";
-                 dump("\nCreated url " + dataurl);
-                 FG_collectedData.push(dataurl);
+                  var savedfilename = goose.saveGaggleData(data, "");
+                  dump("\nSaved gaggle data file " + savedfilename);
+                  if (savedfilename != null)
+                  {
+                     var dataurl = doc.createElement("a");
+                     dataurl.text = broadcastChooser.selectedItem.getAttribute("value");
+                     dataurl.href = savedfilename;
+                     dataurl.hostname = "";
+                     //dataurl.protocol = "file";
+                     dump("\nCreated url " + dataurl);
+                     FG_collectedData.push(dataurl);
+                  }
               }
+              hasGaggleData = true;
           }
       }
-      else {
+
+      if (!hasGaggleData) {
       // We first check if there are any selected text
       //alert(document.commandDispatcher.focusedElement);
           var focusedElement = document.commandDispatcher.focusedElement;

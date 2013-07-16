@@ -77,7 +77,7 @@
     <!--"http://networks.systemsbiology.net/static/lib/DummyApplet.jar" -->
   <html:embed id ="DummyApplet" type="application/x-java-applet;version=1.6"
     code="GaggleFiregooseApplet.class"
-    archive="http://poland:8000/static/lib/GaggleFiregooseApplet.jar, http://poland:8000/static/lib/boss.jar, http://poland:8000/static/lib/gaggle-connector.jar"
+    archive="http://networks.systemsbiology.net/static/lib/GaggleFiregooseApplet.jar, http://networks.systemsbiology.net/static/lib/boss.jar, http://networks.systemsbiology.net/static/lib/gaggle-connector.jar"
     MAYSCRIPT="true" width="0" height="0" />
 </html:div>
 

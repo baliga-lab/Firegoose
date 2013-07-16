@@ -267,7 +267,9 @@ FG_kegg.handleNameList = function(species, names) {
 		queryString += names[i];
 	}
 
+
 	// construct a URL to search kegg
+	dump("KEGG ===  About to map species" + species);
 	var url =	"http://www.genome.jp/kegg-bin/search_pathway_object?"
 			+ "org_name=" + this.toKeggSpeciesCode(species) 
 			+ "&warning=yes"
