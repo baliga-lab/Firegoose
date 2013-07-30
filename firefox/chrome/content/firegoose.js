@@ -38,6 +38,7 @@ var FG_Current_GaggleData = null;
 var FG_Current_WebHandlerReportUrl = null; // A url of a web handler (e.g. EMBL String) to generate the report data
 var FG_Goose = null;
 var FG_sendDataToWorkflow = false;
+var FG_pageScanTimestamp = Date.now();
 
 // these keep track of the last value this window has seen
 // from the goose java class. We poll the goose asking if
@@ -1543,19 +1544,45 @@ FG_GaggleDataFromGoose.prototype.getData = function() {
 function FG_populateBroadcastChooser(itemToSelect) {
     var popup = document.getElementById("fg_broadcastChooserPopup");
     var chooser = document.getElementById("fg_broadcastChooser");
+    var currentTimestamp = Date.now();
+    dump("\n\nCurrent timestamp: " + currentTimestamp);
 
     // remember currently selected item
+    //dump("\n\n----target item: " + itemToSelect);
+    //dump("\n\n----selected item: " + chooser.selectedItem);
     if (!itemToSelect && chooser.selectedItem) {
         itemToSelect = chooser.selectedItem.label;
     }
 
     // delete existing menu items
+
+    var previousItems = popup.childNodes.length;
+    var descriptions = FG_gaggleDataHolder.getDescriptions();
+    //dump("\n\nItem descriptions " + descriptions);
+    var currentItems = 0;
+    if (descriptions != null)
+        for (var j in descriptions) {
+            currentItems = currentItems + 1;
+        }
+
+    dump("\n\n\n---------- Time between two page scans " + (currentTimestamp - FG_pageScanTimestamp));
+    dump("\nPrevious items " + previousItems + " Current items: " + currentItems);
+    if (previousItems > 0 && currentItems == 0 && currentTimestamp - FG_pageScanTimestamp < 1000)
+    {
+        // If time between two page scans are too short, and the second page scan returns 0 item,
+        // we ignore it as it might be an unnecessary page scan
+        FG_pageScanTimestamp = currentTimestamp;
+        return;
+    }
+
+    FG_pageScanTimestamp = currentTimestamp;
     for (var i=popup.childNodes.length - 1; i>=0; i--) {
         popup.removeChild(popup.childNodes.item(i));
     }
 
-    var descriptions = FG_gaggleDataHolder.getDescriptions();
+
     for (var i in descriptions) {
+        //dump("\nPopulating data: " + descriptions[i]);
         var newMenuItem = document.createElement("menuitem");
         newMenuItem.setAttribute("label", descriptions[i]);
         newMenuItem.setAttribute("tooltiptext", descriptions[i]);
