@@ -4,7 +4,7 @@ var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "tblUserFiles";
 var FG_collectedData = null;
 var FG_collectedTableData = null;
-
+var FG_currentTabUrl = null;
 
 function FG_saveState(goose)
 {
@@ -127,8 +127,9 @@ function FG_loadState(goose)
 }
 
 
-function FG_findOrCreateTabWithUrl(url, dataurl)
+function FG_findOrCreateTabWithUrl(url)
 {
+    dump("Tab url: " + FG_currentTabUrl);
     var tabbrowser = getBrowser();
     var found = false;
     var urltab = null;
@@ -156,7 +157,7 @@ function FG_findOrCreateTabWithUrl(url, dataurl)
             //browserWin.focus();
 
             found = true;
-            InjectWorkflowData(dataurl);
+            InjectWorkflowData();
             break;
           }
         }
@@ -181,7 +182,7 @@ function FG_findOrCreateTabWithUrl(url, dataurl)
     return urltab;
 }
 
-function InsertData(url, targettable, dataurl)
+function InsertData(url, targettable)
 {
     if (url != null && targettable != null) {
         dump("\nInserting " + url + " to " + targettable + "with " + targettable.rows.length + " rows\n");
@@ -245,7 +246,7 @@ function InsertData(url, targettable, dataurl)
 
         var td3 = row.insertCell(2); // doc.createElement("td");
         //row.appendChild(td3);
-        td3.innerHTML = dataurl; //"Captured data";
+        td3.innerHTML = FG_currentTabUrl; //"Captured data";
         dump(td3.innerHTML);
 
         var td4 = row.insertCell(3); //document.createElement("td");
@@ -283,9 +284,10 @@ function InsertData(url, targettable, dataurl)
 }
 
 
-function InjectWorkflowData(dataurl)
+function InjectWorkflowData()
 {
     dump("\nInjecting data to workflow space...\n");
+    dump("Data tab url: " + FG_currentTabUrl);
     var doc = gBrowser.contentDocument;
     var dataspacediv = doc.getElementById(FG_workflowDataspaceID);
     dump("\ndataspace div: " + dataspacediv);
@@ -300,7 +302,7 @@ function InjectWorkflowData(dataurl)
              var datatable = doc.getElementById("tblUserFiles");
              dump("inserting target " + datatable);
              for (var lindex = 0; lindex < FG_collectedData.length; lindex++) {
-                  InsertData(FG_collectedData[lindex], datatable, dataurl);
+                  InsertData(FG_collectedData[lindex], datatable);
                 //datadiv.appendChild(FG_collectedData[lindex]);
              }
              //dataspacediv.appendChild(datadiv);
@@ -317,7 +319,7 @@ function InjectWorkflowData(dataurl)
                                 if (urls.length > 0) {
                                     for (var l = 0; l < urls.length; l++) {
                                         var url = urls[l];
-                                        InsertData(url, datatable, dataurl);
+                                        InsertData(url, datatable);
                                     }
                                 }
                             }
@@ -391,12 +393,13 @@ function FG_workflowDataExtract(elementID, elementType)
       var tables = [];
       var doc = gBrowser.contentDocument;
 
-      var taburl = gBrowser.selectedBrowser.contentWindow.location.href;
-      dump("\ndata url: " + taburl);
+      FG_currentTabUrl = gBrowser.selectedBrowser.contentWindow.location.href;
+      dump("\ndata url: " + FG_currentTabUrl);
 
       var broadcastChooser = document.getElementById("fg_broadcastChooser");
       dump("\nbroadcastChooser value " + broadcastChooser.selectedItem.getAttribute("value"));
       var broadcastData = FG_gaggleDataHolder.get(broadcastChooser.selectedItem.getAttribute("value"));
+      dump("\n\nBroadcast data " + broadcastData);
       var hasGaggleData = false;
       if (broadcastData != null)
       {
@@ -439,6 +442,7 @@ function FG_workflowDataExtract(elementID, elementType)
           var focusedElement = document.commandDispatcher.focusedElement;
           var elements1;
           var elements2;
+          FG_currentTabUrl = "";
           if (null != focusedElement)
           {
               try
@@ -570,7 +574,7 @@ function FG_workflowDataExtract(elementID, elementType)
       if (FG_collectedData.length > 0 || FG_collectedTableData.length > 0) {
            // We gathered data, now we send it to the workflow page
            dump("\nFind or create tab for url: " + FG_workflowPageUrl);
-           FG_findOrCreateTabWithUrl(FG_workflowPageUrl, taburl);
+           FG_findOrCreateTabWithUrl(FG_workflowPageUrl);
       }
       else
           FG_sendDataToWorkflow = false;

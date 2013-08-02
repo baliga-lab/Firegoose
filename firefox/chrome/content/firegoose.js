@@ -165,6 +165,12 @@ var FG_pageListener = {
         
         // if clearPageData isn't passed, default it to true
         clearPageData = typeof(clearPageData) == 'undefined' ? true : clearPageData;
+        var currentTimestamp = Date.now();
+        dump("\n\nCurrent timestamp: " + currentTimestamp);
+        // if the time between two page load events is too short,
+        // we should not clean the gaggleDataHolder
+        if (currentTimestamp - FG_pageScanTimestamp < 1000)
+            clearPageData = false;
         FG_trace("Clear page data = " + clearPageData);
         
         // If we're loading a page containing frames, we'll get several page load events
@@ -1389,6 +1395,23 @@ function FG_pollGoose() {
         FG_populateTargetChooser();
         FG_isConnected = connected;
         dump("\nFinished adjusting UI\n");
+    }
+
+    if (!connected) {
+        var doc = gBrowser.contentDocument;
+        var workflowpageinput = doc.getElementById("inputFiregoose");
+        //dump("\n\n\nworkflow page input: " + workflowpageinput);
+        if (workflowpageinput != null)
+        {
+            var inputvalue = workflowpageinput.value;
+            dump("\nHidden workflow page input value " + inputvalue);
+            if (inputvalue == "BossStarting")
+            {
+                // Boss is being started, we try to connect to Boss
+                //workflowpageinput.value = "";
+                FG_connectToGaggle(true);
+            }
+        }
     }
 
     //alert(FG_Workflow_InProgress);
