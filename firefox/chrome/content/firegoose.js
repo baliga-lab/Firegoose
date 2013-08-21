@@ -1423,7 +1423,8 @@ function FG_pollGoose() {
             try
             {
                 // We just processed some workflow data, we need to report to the server
-                if (FG_Current_GaggleData.getType() == "WorkflowData")
+
+                /*if (FG_Current_GaggleData.getType() == "WorkflowData")
                 {
                     // This is a URL
                     var data = (FG_Current_GaggleData.getData())[0];
@@ -1431,7 +1432,7 @@ function FG_pollGoose() {
                     // Pass the url to the goose, which will pass it to the boss, which will pass it to the server
                     goose.saveWorkflowData(FG_Current_GaggleData.getRequestID(), "Firegoose", data);
                 }
-                else
+                else */
                 {
                     // Pass the url to the goose, which will pass it to the boss, which will pass it to the server
                     var browser = gBrowser.getBrowserForTab(FG_Current_Tab);
