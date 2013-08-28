@@ -614,8 +614,8 @@ function FG_findWorkflowData(requestID)
 function HandleGaggleData(gaggleData, secondaryData)
 {
     // Put the data to the holder and the broadcast chooser
-    //FG_gaggleDataHolder.put(gaggleData);
-    //FG_populateBroadcastChooser(gaggleData.getDescription());
+    FG_gaggleDataHolder.put(gaggleData);
+    FG_populateBroadcastChooser(gaggleData.getDescription());
 
     // We get a string of concatenated subactions delimited by ';'
     dump("SubAction: " + gaggleData.getSubAction() + "\n");
@@ -1026,13 +1026,13 @@ function FG_GaggleDeserializedData(data, type) {
         this._type = type;
         if (type == "Namelist")
         {
-            this._data = data.getNames();
+            this._data = data;//.getNames();
             this._size = data.getNames().length;
             dump("\nNamelist length: " + this._size);
         }
         else if (type == "Cluster")
         {
-            this._data = data.getRowNames();
+            this._data = data;//.getRowNames();
             this._size = data.getRowNames().length;
             dump("\nCluster length: " + this._size);
         }

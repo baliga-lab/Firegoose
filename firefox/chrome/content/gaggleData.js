@@ -84,7 +84,7 @@ FG_GaggleData.prototype._applyDefaultSpecies = function(species) {
  * java when the data is requested (when getData() is called).
  */
 FG_GaggleData.prototype.setConvertToJavaOnGetData = function() {
-	dump("setConvertToJavaOnGetData " + this._name + "\n");
+	dump("\nsetConvertToJavaOnGetData " + this._name + "\n");
 
 	var oldGetData = this.getData;
 	if (!oldGetData._already_setConvertToJavaOnGetData) {
@@ -113,7 +113,7 @@ FG_GaggleData.prototype.setConvertToJavaOnGetData = function() {
 					this._data = FG_GaggleData.jsToJavaNetwork(this.getName(), this.getSpecies(), data);
 				}
 				else if (this.getType() == "DataMatrix") {
-				    dump("\nConverting data matrix to Java object....\n");
+				    dump("\nConverting data matrix to Java object " + this.getName() + "\n");
 					this._data = FG_GaggleData.jsToJavaDataMatrix(this.getName(), this.getSpecies(), data);
 				}
 				else if (this.getType() == "Cluster") {
@@ -138,7 +138,7 @@ FG_GaggleData.prototype.getDataAsNameList = function() {
     if (this._type == "NameList")
     {
         dump("\nNamelist " + this.getData());
-        return this.getData();
+        return this.getData().getNames();
     }
 	else if (this._type=='Network') {
 		var network = this.getData();

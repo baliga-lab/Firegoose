@@ -40,6 +40,7 @@ FG_david.getPageData = function(doc) {
 FG_david.handleNameList = function(species, names) {
 
 	// store the species and names in this object
+	FG_trace("DAVID handle namelist " + names);
 	this.species = species;
 	this.names = names;
 
@@ -91,6 +92,7 @@ FG_david.handleNameList = function(species, names) {
 FG_david.onPageLoad = function(david, aEvent) {
 	if (aEvent.originalTarget.nodeName == "#document") {
 		var doc = window.content.document;
+		FG_trace("Inserting namelist...");
 		david.insertNamelistIntoPasteBox(doc);
 
 		// hack: the David summary page selects the 'list'
@@ -126,12 +128,14 @@ function FG_David_selectUploadTab() {
  */
 FG_david.insertNamelistIntoPasteBox = function(doc) {
 	var elements;
+	FG_trace("Names to be inserted " + this.names);
 	if (!this.names) return;
 
 	// put names in paste box
 	elements = doc.getElementsByName("pasteBox");
 	if (elements) {
 		// construct a string out of the name list
+		FG_trace("Inserting names into the paste box..." + elements);
 		elements[0].value = FG_util.join(this.names, "\n");
 	}
 

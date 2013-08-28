@@ -92,21 +92,31 @@ FG_stampHandler.createOnloadFormFiller = function(matrix) {
 
 			var doc = window.content.document;
 
-			// build position-specific scoring matrix as a string
-			FG_trace("building PSSM string");
-			var pssm = ">" + matrix.getName() + "\n";
-			var rowNames = matrix.getRowTitles();
-			var len = rowNames.length;
-			for (var i=0; i<len; i++) {
-				var values = matrix.get(i);
-				if (values.length > 0) {
-					pssm += values[0];
-				}
-				for (var j=1; j<values.length; j++) {
-					pssm += " " + values[j];
-				}
-				pssm += "\n"
-			}
+            try
+            {
+                // build position-specific scoring matrix as a string
+                FG_trace("building PSSM string " + matrix.getName());
+                var pssm = ">" + matrix.getName() + "\n";
+                var rowNames = matrix.getRowTitles();
+                FG_trace("Row names " + rowNames);
+                var len = rowNames.length;
+                FG_trace("Row names length " + len);
+                for (var i=0; i<len; i++) {
+                    var values = matrix.get(i);
+                    FG_trace("row values " + values);
+                    if (values.length > 0) {
+                        pssm += values[0];
+                    }
+                    for (var j=1; j<values.length; j++) {
+                        pssm += " " + values[j];
+                    }
+                    pssm += "\n";
+                }
+            }
+            catch (e)
+            {
+                FG_trace("Failed to build PSSM string " + e);
+            }
 
 			// find input field and dump matrix into it.
 			FG_trace("finding input element");

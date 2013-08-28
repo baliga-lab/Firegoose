@@ -864,7 +864,6 @@ function FG_broadcast() {
         return;
     }
 
-    dump("broadcasting: " + broadcastData.getDescription() + " to " + target + "\n\n");
 	FG_trace("broadcasting: "  + broadcastData.getDescription() + " to " + target + "\n\n");
 
     // There are a couple of funny aspects to how a broadcast takes place. The first is that
@@ -959,7 +958,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             dump("Can handle namelist");
             //if (goose != null)
             //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
-            newtab = handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData());
+            newtab = handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData().getNames());
             FG_attachTabData(newtab, target, broadcastData);
         }
     }
@@ -997,7 +996,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             if (handler.handleMatrix) {
                 //if (goose != null)
                 //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Matrix\"}");
-                newtab = handler.handleMatrix(broadcastData);
+                newtab = handler.handleMatrix(broadcastData.getData());
                 FG_attachTabData(newtab, target, broadcastData);
             }
             // if target doesn't take a matrix, use row names as a name list
@@ -1064,8 +1063,8 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
     try
     {
         if (broadcastData.getType() == "NameList") {
-            dump("\nbroadcasting some identifiers to " + target + " " + broadcastData.getData() + "\n");
-            var javaArray = javaFiregooseLoader.jsStringArrayToDelimitedString(broadcastData.getData(), ";");
+            dump("\nbroadcasting some identifiers to " + target + " name " + broadcastData.getName() + " species " + broadcastData.getSpecies() + " data " + broadcastData.getData() + "\n");
+            var javaArray = javaFiregooseLoader.jsStringArrayToDelimitedString(broadcastData.getData().getNames(), ";");
             dump("\n\n\nData: " + javaArray);
               //.toJavaStringArray(broadcastData.getData());
             goose.broadcastNameList(target, broadcastData.getName(), broadcastData.getSpecies(), javaArray, ";");
