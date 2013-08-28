@@ -60,7 +60,7 @@ function FG_saveState(goose)
                                         goose.saveStateInfo(handler,
                                             broadcastData.getName(),
                                             broadcastData.getSpecies(),
-                                            broadcastData.getData());
+                                            broadcastData.getData().getNames());
                                     }
                                     else {
                                         data = broadcastData.getGaggleData();
