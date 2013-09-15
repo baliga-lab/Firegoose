@@ -341,6 +341,7 @@ function InjectWorkflowData()
 }
 
 function getSelectedElements(win, tagName) {
+    var doc = gBrowser.contentDocument;
     var sel = win.getSelection(), selectedElements = [];
     var range, elementRange, elements;
     try {
@@ -374,6 +375,14 @@ function getSelectedElements(win, tagName) {
                         }
                     }
                 }
+            }
+            if (selectedElements.length == 0 && sel.toString().length > 0)
+            {
+                var dataurl = doc.createElement("a");
+                dataurl.text = sel.toString();
+                dump("\n\n========<><>Selected text: " + dataurl.text + "\n\n");
+                dataurl.href = "";
+                selectedElements.push(dataurl);
             }
             elementRange.detach();
         }
@@ -425,7 +434,7 @@ function FG_workflowDataExtract(elementID, elementType)
                   {
                      var dataurl = doc.createElement("a");
                      dataurl.text = broadcastChooser.selectedItem.getAttribute("value");
-                     dataurl.href = savedfilename;
+                     dataurl.href = "file://" + savedfilename;
                      dataurl.hostname = "";
                      //dataurl.protocol = "file";
                      dump("\nCreated url " + dataurl);
@@ -443,6 +452,7 @@ function FG_workflowDataExtract(elementID, elementType)
           var elements1;
           var elements2;
           FG_currentTabUrl = "";
+          var Selection = null;
           if (null != focusedElement)
           {
               try
@@ -468,7 +478,7 @@ function FG_workflowDataExtract(elementID, elementType)
               //alert(focusedWindow);
               var winWrapper = new XPCNativeWrapper(focusedWindow, 'document');
               dump("\nWinWrapper: " + winWrapper);
-              var Selection = winWrapper.getSelection();
+              Selection = winWrapper.getSelection();
               dump("\n Section: " + Selection);
               if (Selection != null) {
                   elements2 = getSelectedElements(winWrapper, "a");
@@ -493,7 +503,7 @@ function FG_workflowDataExtract(elementID, elementType)
              }
           }
 
-          if (FG_collectedData.length == 0) {
+          if (Selection.rangeCount == 0 || Selection.toString().length == 0) {
               // If no selected text, we find all the tables on a page and get all the hypertext links in the table
               if (elementType == "table") {
                   if (elementID.length == 0)
@@ -975,8 +985,8 @@ FG_GaggleWorkflowDataFromGoose.prototype.getData = function() {
         }
         dump("\n");
     }
-    return data;
-
+    var namelist = FG_GaggleData.jsToJavaNameList(this.getName(), this.getSpecies(), data);
+    return namelist;
     // TODO:  handle all data types here and in FireGoose.java
 }
 

@@ -557,7 +557,7 @@ FG_kegg.toKeggSpeciesCode = function(s) {
 
 	s = s.replace(" str. ", " ");
 	s = s.replace(" substr. ", " ");
-	dump("converting species: " + s + "\n");
+	dump("\nconverting species: " + s + "\n");
 
 	// fudge for species synonyms
 	if (s in this.speciesSynonyms) {
@@ -1294,6 +1294,7 @@ FG_kegg.speciesCodes = {
 "ter": "trichodesmium erythraeum",
 "amr": "acaryochloris marina",
 "bth": "bacteroides thetaiotaomicron",
+"bth": "bacteroides thetaiotaomicron vpi-5482",
 "bfr": "bacteroides fragilis ych46",
 "bfs": "bacteroides fragilis nctc9343",
 "bvu": "bacteroides vulgatus",

@@ -1547,7 +1547,8 @@ FG_GaggleDataFromGoose.prototype.getData = function() {
             dump("Namelist " + i + ": " + data[i] + "\n");
         }
     }
-    return data;
+    var namelist = FG_GaggleData.jsToJavaNameList(this.getName(), this.getSpecies(), data);
+    return namelist;
 
     // TODO:  handle all data types here and in FireGoose.java
 }
