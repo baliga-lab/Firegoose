@@ -678,6 +678,7 @@ function FG_WorkflowDataReceived(gaggleData, goose)
         {
             // This is a URL, it might be ; delimited
             var data = (gaggleData.getData())[0];
+            dump("\n\nData: " + data);
             var actions = data.split(";");
             for (var i = 0; i < actions.length; i++)
             {
@@ -985,6 +986,8 @@ FG_GaggleWorkflowDataFromGoose.prototype.getData = function() {
         }
         dump("\n");
     }
+    if (this.getType() == "WorkflowData")
+        return data;
     var namelist = FG_GaggleData.jsToJavaNameList(this.getName(), this.getSpecies(), data);
     return namelist;
     // TODO:  handle all data types here and in FireGoose.java

@@ -9,16 +9,21 @@
 
 package org.systemsbiology.gaggle.geese.firegoose;
 
-import java.rmi.RemoteException;
-import java.util.*;
-
 import net.sf.json.JSONObject;
 import netscape.javascript.JSObject;
-import org.systemsbiology.gaggle.core.*;
+import org.systemsbiology.gaggle.core.Boss;
+import org.systemsbiology.gaggle.core.Boss3;
+import org.systemsbiology.gaggle.core.Goose3;
+import org.systemsbiology.gaggle.core.GooseWorkflowManager;
 import org.systemsbiology.gaggle.core.datatypes.*;
 import org.systemsbiology.gaggle.geese.common.GaggleConnectionListener;
-import org.systemsbiology.gaggle.geese.common.RmiGaggleConnector;
 import org.systemsbiology.gaggle.geese.common.GooseShutdownHook;
+import org.systemsbiology.gaggle.geese.common.RmiGaggleConnector;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
