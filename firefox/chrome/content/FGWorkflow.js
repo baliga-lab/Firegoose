@@ -56,13 +56,16 @@ function FG_saveState(goose)
                                     var data = null;
                                     if (broadcastData.getGaggleData == undefined)
                                     {
+                                        // This is a Java object (i.e., Cluster, NameList, Network, Matrix, etc)
                                         dump("\nSave namelist data");
                                         goose.saveStateInfo(handler,
                                             broadcastData.getName(),
                                             broadcastData.getSpecies(),
-                                            broadcastData.getData().getNames());
+                                            //broadcastData.getData().getNames());
+                                            broadcastData.getDataAsNameList());
                                     }
                                     else {
+                                        // This is workflow data
                                         data = broadcastData.getGaggleData();
                                         dump("\nSave handler: " + handler + " data " + data);
                                         goose.saveStateInfo(handler, data);
@@ -210,6 +213,13 @@ function InsertData(url, targettable)
         label.appendChild(checkbox);
 
         try {
+
+            var urltext = url.text.trim();
+            dump("\n\nTrimmed url text " + urltext);
+            if (urltext != null && (urltext.indexOf(",") == urltext.length - 1))
+                urltext = urltext.substring(0, urltext.length - 1);
+            url.text = urltext;
+            dump("\n\nProcessed url text " + urltext);
             var urlclone = url.cloneNode(true);
             dump("\nCloned url " + urlclone);
             label.appendChild(urlclone);
@@ -378,11 +388,16 @@ function getSelectedElements(win, tagName) {
             }
             if (selectedElements.length == 0 && sel.toString().length > 0)
             {
-                var dataurl = doc.createElement("a");
-                dataurl.text = sel.toString();
-                dump("\n\n========<><>Selected text: " + dataurl.text + "\n\n");
-                dataurl.href = "";
-                selectedElements.push(dataurl);
+                var splitted = sel.toString().split("\n"); // ([^\S\n]+);
+                dump("\n\nSplitted selected text " + splitted);
+                for (var i = 0; i < splitted.length; i++)
+                {
+                    var dataurl = doc.createElement("a");
+                    dataurl.text = splitted[i];
+                    dump("\n\n========<><>Selected text: " + dataurl.text + "\n\n");
+                    dataurl.href = "";
+                    selectedElements.push(dataurl);
+                }
             }
             elementRange.detach();
         }
@@ -593,6 +608,7 @@ function FG_workflowDataExtract(elementID, elementType)
 // Event handler for the Send to workflow button
 function FG_sendToWorkflow()
 {
+    dump("\n\nCapturing data.... " + FG_sendDataToWorkflow);
     if (!FG_sendDataToWorkflow)
     {
         FG_sendDataToWorkflow = true;
@@ -1041,12 +1057,16 @@ function FG_GaggleDeserializedData(data, type) {
         {
             this._data = data;//.getNames();
             this._size = data.getNames().length;
-            dump("\nNamelist length: " + this._size);
+            this._name = data.getName();
+            this._species = data.getSpecies();
+            dump("\nNamelist length: " + this._size + " name: " + this._name);
         }
         else if (type == "Cluster")
         {
             this._data = data;//.getRowNames();
             this._size = data.getRowNames().length;
+            this._name = data.getName();
+            this._species = data.getSpecies();
             dump("\nCluster length: " + this._size);
         }
         else if (type == "Network") {
@@ -1066,7 +1086,7 @@ FG_GaggleDeserializedData.prototype.getType = function() {
 }
 
 FG_GaggleDeserializedData.prototype.getSize = function() {
-    return this._data.getSize();
+    return this._size;
 }
 
 FG_GaggleDeserializedData.prototype.getSpecies = function() {

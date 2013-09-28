@@ -458,6 +458,7 @@ function FG_initialize() {
 	        if (topic == "quit-application-granted") {
 	            this.unregister();
 	            try {
+	                      dump("\nUnregister Firegoose...");
 			    	      var goose = javaFiregooseLoader.getGoose();
 			    	      goose.disconnectFromGaggle();
 	            }
@@ -470,6 +471,7 @@ function FG_initialize() {
 
 	    register: function()
 	    {
+	        dump("\nRegistering quit-application-granted observer service");
 	        var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 	        observerService.addObserver(this, "quit-application-granted", false);
 	    },

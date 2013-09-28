@@ -134,13 +134,15 @@ FG_GaggleData.prototype.setConvertToJavaOnGetData = function() {
 }
 
 FG_GaggleData.prototype.getDataAsNameList = function() {
+    if (this._type == null)
+        this._type = this.getType();
     dump("\nGetDataAsNameList type " + this._type);
-    if (this._type == "NameList")
+    if (this._type.toLowerCase() == "namelist")
     {
         dump("\nNamelist " + this.getData());
         return this.getData().getNames();
     }
-	else if (this._type=='Network') {
+	else if (this._type.toLowerCase() == 'network') {
 		var network = this.getData();
 		if (network) {
 		    if (network.getNodes != undefined)
@@ -149,13 +151,13 @@ FG_GaggleData.prototype.getDataAsNameList = function() {
 			    return network;
 		}
 	}
-	else if (this._type=="DataMatrix") {
+	else if (this._type.toLowerCase() =="datamatrix") {
 		var matrix = this.getData();
 		if (matrix) {
 			return matrix.getRowTitles();
 		}
 	}
-	else if (this._type=="Cluster") {
+	else if (this._type.toLowerCase() == "cluster") {
 		var cluster = this.getData();
 		if (cluster && cluster.rowNames) {
 			return cluster.rowNames;
