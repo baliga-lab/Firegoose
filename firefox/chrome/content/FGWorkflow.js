@@ -1,6 +1,6 @@
 //var FG_workflowPageUrl = "http://localhost:8000/workflow";
 //var FG_workflowPageUrl = "http://poland:8000/workflow";
-var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
+var FG_workflowPageUrl = "http://localhost:8000/workflow";
 var FG_workflowDataspaceID = "tblUserFiles";
 var FG_collectedData = null;
 var FG_collectedTableData = null;
@@ -211,6 +211,7 @@ function InsertData(url, targettable)
         var checkbox = doc.createElement("input");
         checkbox.setAttribute("type", "checkbox");
         label.appendChild(checkbox);
+        checkbox.checked = "true";
 
         try {
 
