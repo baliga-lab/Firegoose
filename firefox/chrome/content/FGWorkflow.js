@@ -1,6 +1,6 @@
-//var FG_workflowPageUrl = "http://localhost:8000/workflow";
-//var FG_workflowPageUrl = "http://poland:8000/workflow";
 var FG_workflowPageUrl = "http://localhost:8000/workflow";
+//var FG_workflowPageUrl = "http://poland:8000/workflow";
+//var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
 var FG_workflowDataspaceID = "tblUserFiles";
 var FG_collectedData = null;
 var FG_collectedTableData = null;
@@ -270,10 +270,10 @@ function InsertData(url, targettable)
         option0.value = "0";
         option0.innerHTML = "Select an operation";
         select.appendChild(option0);
+
         var option1 = doc.createElement("option");
         option1.value = "1";
         option1.innerHTML = "Open";
-        select.appendChild(option1);
 
         //TODO add quick view back later
         //var option2 = doc.createElement("option");
@@ -285,6 +285,11 @@ function InsertData(url, targettable)
         option3.value = "3";
         option3.innerHTML = "Download";
         select.appendChild(option3);
+
+        var option4 = doc.createElement("option");
+        option4.value = "4";
+        option4.innerHTML = "Edit";
+        select.appendChild(option4);
 
         //var hoverimage = doc.createElement("img");
         //hoverimage.className = "dataspacehoverimage";
@@ -748,6 +753,9 @@ function FG_WorkflowDataReceived(gaggleData, goose)
 
 function FG_setWorkflowUI(action)
 {
+    // UI temporarily disabled
+    return;
+
     if (action != undefined && action != null)
     {
         dump("\nSetting workflow UI\n");
@@ -933,13 +941,15 @@ function FG_processWorkflowResponseData(data, gaggleWorkflowData, gooseindex)
             // diable the item from the nextcomponent dropdown
             var popup = document.getElementById("fg_nextcomponentPopup");
             var chooser = document.getElementById("fg_nextcomponents");
-            var component = action.getTargets()[parseInt(gooseindex)];
-            dump("\nUpdate dropdown for " + component.getName());
-            for (var i=popup.childNodes.length - 1; i>=0; i--) {
-                if (i == parseInt(gooseindex))
-                {
-                    popup.childNodes[i].setAttribute("label", (component.getName() + "(data committed)"));
-                    break;
+            if (popup != null && chooser != null) {
+                var component = action.getTargets()[parseInt(gooseindex)];
+                dump("\nUpdate dropdown for " + component.getName());
+                for (var i=popup.childNodes.length - 1; i>=0; i--) {
+                    if (i == parseInt(gooseindex))
+                    {
+                        popup.childNodes[i].setAttribute("label", (component.getName() + "(data committed)"));
+                        break;
+                    }
                 }
             }
 

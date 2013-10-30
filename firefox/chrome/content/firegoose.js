@@ -1303,8 +1303,9 @@ function FG_adjustUi() {
         status.setAttribute("src", "chrome://firegoose/skin/disconnected.png");
     }
 
-    var pnl = document.getElementById("fg_nextcomponents");
-    pnl.style.backgroundColor = "white";
+    // TODO: This is commented out since the "Next workflow component" button is temporarily disabled
+    //var pnl = document.getElementById("fg_nextcomponents");
+    //pnl.style.backgroundColor = "white";
 
     FG_adjustBroadcastButton();
 }
