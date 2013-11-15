@@ -67,6 +67,7 @@ FG_pipe2Goose.handleNameList = function(species, names) {
 	// a new page. This is no good from a security point of view.
 	// Find the first tab with a page that implements a goose object
 	// and call the handler method on the goose object.
+	dump("\nPIPE2 handle names " + names + " species " + species + "\n");
 	var found = false;
 	var num = gBrowser.browsers.length;
 	for (var i = 0; i < num; i++) {
@@ -77,7 +78,13 @@ FG_pipe2Goose.handleNameList = function(species, names) {
                 && browser.contentWindow.wrappedJSObject.goose!=null) {
 				gBrowser.tabContainer.selectedIndex = i;
 				var goose = browser.contentWindow.wrappedJSObject.goose;
-				goose.handleNameList(species, names);
+				// convert java string to javascript string. PIPE2 doesn't handle java string.
+                var tempnames = new Array();
+                for (var i = 0; i < names.length; i++)
+                {
+                    tempnames[i] = names[i];
+                }
+				goose.handleNameList(species, tempnames);
 				found = true;
 				FG_Workflow_InProgress = false;
 				break;
@@ -87,6 +94,7 @@ FG_pipe2Goose.handleNameList = function(species, names) {
 			FG_trace(e);
 		}
 	}
+
 	if (!found) {
 		this.show();
 
@@ -94,7 +102,13 @@ FG_pipe2Goose.handleNameList = function(species, names) {
 		var poller = new Object();
 		poller.timerCount = 0;
 		poller.species = species;
-		poller.names = names;
+		// convert java string to javascript string. PIPE2 doesn't handle java string.
+		var tempnames = new Array();
+		for (var i = 0; i < names.length; i++)
+		{
+		    tempnames[i] = names[i];
+		}
+		poller.names = tempnames; //names;
 		poller.browser = gBrowser.selectedBrowser;
 
 		// the poll function checks for the presence of the receiving goose
@@ -106,6 +120,7 @@ FG_pipe2Goose.handleNameList = function(species, names) {
 			dump("namelist = " + this.names + "\n");
 
 			var goose = this.browser.contentWindow.wrappedJSObject.goose;
+			dump("Got goose " + goose);
 			if (goose) {
 				try {
 					goose.handleNameList(this.species, this.names);

@@ -1,6 +1,6 @@
-var FG_workflowPageUrl = "http://localhost:8000/workflow";
-//var FG_workflowPageUrl = "http://poland:8000/workflow";
-//var FG_workflowPageUrl = "http://networks.systemsbiology.net/workflow";
+//var FG_workflowPageUrl = "http://localhost:8000/workspace";
+//var FG_workflowPageUrl = "http://poland:8000/workspace";
+var FG_workflowPageUrl = "http://networks.systemsbiology.net/workspace";
 var FG_workflowDataspaceID = "tblUserFiles";
 var FG_collectedData = null;
 var FG_collectedTableData = null;
@@ -274,6 +274,7 @@ function InsertData(url, targettable)
         var option1 = doc.createElement("option");
         option1.value = "1";
         option1.innerHTML = "Open";
+        select.appendChild(option1);
 
         //TODO add quick view back later
         //var option2 = doc.createElement("option");

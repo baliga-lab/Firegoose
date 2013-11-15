@@ -80,7 +80,13 @@ FG_pipeGoose.prototype.handleNameList = function(species, names) {
                 && browser.contentWindow.wrappedJSObject.goose!=null) {
 				gBrowser.tabContainer.selectedIndex = i;
 				var goose = browser.contentWindow.wrappedJSObject.goose;
-				goose.handleNameList(species, names);
+				// convert java string to javascript string. PIPE2 doesn't handle java string.
+                var tempnames = new Array();
+                for (var i = 0; i < names.length; i++)
+                {
+                    tempnames[i] = names[i];
+                }
+				goose.handleNameList(species, tempnames);
 				FG_Workflow_InProgress = false;
 				found = true;
 				break;
@@ -97,7 +103,13 @@ FG_pipeGoose.prototype.handleNameList = function(species, names) {
 		var poller = new Object();
 		poller.timerCount = 0;
 		poller.species = species;
-		poller.names = names;
+		// convert java string to javascript string. PIPE2 doesn't handle java string.
+        var tempnames = new Array();
+        for (var i = 0; i < names.length; i++)
+        {
+            tempnames[i] = names[i];
+        }
+		poller.names = tempnames;
 		poller.browser = gBrowser.selectedBrowser;
 
 		// the poll function checks for the presence of the receiving goose

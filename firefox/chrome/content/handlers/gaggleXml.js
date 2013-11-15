@@ -64,13 +64,10 @@ FG_gaggleXml.getPageData = function(doc) {
 								// tab-delimited list of names.
 								if (node.firstChild.nodeType == Node.TEXT_NODE) {
 									var names = this.processNamelist(node.firstChild.nodeValue);
-									results.push(
-										new FG_GaggleData(
-										    name,
-										    "NameList",
-											names.length,
-											species,
-											names));
+									var gaggleData =  new FG_GaggleData(name,"NameList", names.length,
+                                                      					species,
+                                                      					names);
+									results.push(gaggleData.setConvertToJavaOnGetData());
 								}
 							}
 							else if (refType == "indirect") {
@@ -178,6 +175,7 @@ FG_gaggleXml.fetchIndirectNamelist = function(url, gaggleData) {
 			if (request.status == 200 || (request.status == 0 && request.responseText)) {
 				// store the network in GaggleData object and notify callback.
 				gaggleData._data = gaggleXml.processNamelist(request.responseText);
+                gaggleData.setConvertToJavaOnGetData();
 
 				FG_trace("fetching indirect data completed");
 

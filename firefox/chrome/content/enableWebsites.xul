@@ -28,7 +28,8 @@
 		    	return prefs.getBoolPref(FG_fixName(name));
 		    }
 		    catch (e) {
-		    	return true;
+                // By default setting to invisible
+		    	return false;
 		    }
 		}
 

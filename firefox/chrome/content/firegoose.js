@@ -900,10 +900,19 @@ function FG_broadcast() {
  */
 function FG_dispatchBroadcast(broadcastData, target, targetType) {
     // if target is a website, look up its handler and broadcast
+    FG_trace("Broadcasting to " + target + " type " + targetType);
     if (targetType == "Website") {
         FG_dispatchBroadcastToWebsite(broadcastData, target);
     }
-
+    else if (targetType == "Dataspace") {
+        // Target is the Dataspace
+        var broadcastChooser = document.getElementById("fg_broadcastChooser");
+        dump("\nbroadcastChooser value " + broadcastChooser.selectedItem.getAttribute("value"));
+        var broadcastData = FG_gaggleDataHolder.get(broadcastChooser.selectedItem.getAttribute("value"));
+        dump("\n\nBroadcast data " + broadcastData);
+        if (broadcastData != null)
+            FG_sendToWorkflow();
+    }
     // if target is a goose
     else if (targetType == "GaggleGoose") {
         FG_dispatchBroadcastToGoose(broadcastData, target);
@@ -939,6 +948,7 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
     var handler = FG_websiteHandlers[target];
     var datatype = broadcastData.getType();
     dump("\nWeb handler: " + handler);
+    dump("\nData: " + broadcastData);
     dump("\ndata type " + datatype);
     dump("\ntarget: " + target);
     dump("\nData: " + broadcastData.getData());
@@ -960,7 +970,8 @@ function FG_dispatchBroadcastToWebsite(broadcastData, target) {
             dump("Can handle namelist");
             //if (goose != null)
             //    goose.recordWorkflow(null, url, target, "{\"datatype\":\"Namelist\"}");
-            newtab = handler.handleNameList(broadcastData.getSpecies(), broadcastData.getData().getNames());
+            names =  (broadcastData.getData().getNames == null) ? broadcastData.getData() : broadcastData.getData().getNames();
+            newtab = handler.handleNameList(broadcastData.getSpecies(), names);
             FG_attachTabData(newtab, target, broadcastData);
         }
     }
@@ -1065,8 +1076,9 @@ function FG_dispatchBroadcastToGoose(broadcastData, target) {
     try
     {
         if (broadcastData.getType() == "NameList") {
+            names = (broadcastData.getData().getName == null) ? broadcastData.getData() : broadcastData.getData().getNames();
             dump("\nbroadcasting some identifiers to " + target + " name " + broadcastData.getName() + " species " + broadcastData.getSpecies() + " data " + broadcastData.getData() + "\n");
-            var javaArray = javaFiregooseLoader.jsStringArrayToDelimitedString(broadcastData.getData().getNames(), ";");
+            var javaArray = javaFiregooseLoader.jsStringArrayToDelimitedString(names, ";");
             dump("\n\n\nData: " + javaArray);
               //.toJavaStringArray(broadcastData.getData());
             goose.broadcastNameList(target, broadcastData.getName(), broadcastData.getSpecies(), javaArray, ";");
@@ -1495,6 +1507,7 @@ function FG_pollGoose() {
         if (value > FG_previousNewDataSignalValue) {
             FG_previousNewDataSignalValue = value;
             var gaggleData = new FG_GaggleDataFromGoose();
+            dump("\nFG_GaggleDataFromGoose received\n")
             FG_gaggleDataHolder.put(gaggleData);
             FG_populateBroadcastChooser(gaggleData.getDescription());
         }
@@ -1540,7 +1553,7 @@ FG_GaggleDataFromGoose.prototype.getSpecies = function() {
 }
 
 FG_GaggleDataFromGoose.prototype.getData = function() {
-    dump("GaggleDataFromGoose: getData...");
+    dump("\nGaggleDataFromGoose: getData...\n");
     var goose = javaFiregooseLoader.getGoose();
     var data = goose.getNameList();
     if (data != undefined && data.length != undefined)
@@ -1694,6 +1707,13 @@ function FG_populateTargetChooser() {
         popup.appendChild(menuItem);
     }
 
+    // add the workspace
+    var menuItem = document.createElement("menuitem");
+    menuItem.setAttribute("label", "Dataspace");
+    menuItem.setAttribute("type", "Dataspace");
+    menuItem.setAttribute("tooltiptext", "Send data to the workspace");
+    popup.appendChild(menuItem);
+
     // separator between geese and websites
     newMenuItem = document.createElement("separator");
     popup.appendChild(newMenuItem);
@@ -1706,7 +1726,7 @@ function FG_populateTargetChooser() {
         try {
             return prefs.getBoolPref(FG_fixName(name));
         } catch (e) {
-            return true;
+            return false;
         }
     }
 
