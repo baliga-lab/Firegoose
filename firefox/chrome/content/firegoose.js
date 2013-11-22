@@ -27,6 +27,7 @@
  // requires gaggleData.js
 
 var FG_timerIntervalId = null;
+var FG_versionCheckId = null;
 var FG_websiteHandlers = {};
 var FG_default = {species : "unknown", mode : "default"};
 var FG_isConnected = false;
@@ -397,6 +398,8 @@ var FG_pageListener = {
 function FG_initialize() {
 
 	try {
+	    FG_showButton("fg_updateFiregoose", false);
+
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"].
 				getService(Components.interfaces.nsIPrefBranch);
 
@@ -610,12 +613,140 @@ function FG_initUI() {
 function FG_startTimedEvent() {
     dump("Starting polling...");
 	FG_timerIntervalId = setTimeout('FG_pollGoose()', 2000); //setInterval('FG_pollGoose()', 5000);
+	FG_versionCheckId = setTimeout('FG_versionCheck()', 500);
 }
 
 function FG_clearTimedEvent() {
 	if (FG_timerIntervalId) {
 		clearInterval(FG_timerIntervalId);
 	}
+
+	if (FG_versionCheckId)
+	{
+	    clearInterval(FG_versionCheckId);
+	}
+}
+
+function getVersion(addonID, callback) {
+    var ascope = { };
+
+    if (typeof(Components.classes["@mozilla.org/extensions/manager;1"]) != 'undefined') {
+        var extMan = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
+        var ext = extMan.getItemForID(addonID);
+        ext.QueryInterface(Components.interfaces.nsIUpdateItem);
+        callback(ext.version);
+        return;
+    }
+
+    if (typeof(Components.utils) != 'undefined' && typeof(Components.utils.import) != 'undefined') {
+        Components.utils.import("resource://gre/modules/AddonManager.jsm", ascope);
+    }
+
+    /*ascope.AddonManager.getAllAddons(function (addons) {
+        if (addons != null)
+        {
+            for (var i = 0; i < addons.length; i++)
+            {
+                //dump("\nAdd on name: " + addons[i].name);
+                if (addons[i].name == "FireGoose")
+                {
+                   dump("\nFiregoose id " + addons[i].id);
+                   callback(addons[i].version);
+                   break;
+                }
+            }
+        }
+
+    });  */
+    ascope.AddonManager.getAddonByID(addonID, function (addon)
+    {
+        callback(addon.version);
+    });
+}
+
+function FG_showButton(buttonid, show)
+{
+    var id = buttonid; //"fg_updateFiregoose";
+    var toolbarId = "fg_firegooseToolbarhbox";
+
+    var toolbar = document.getElementById(toolbarId);
+    dump("\nToolbar " + toolbar);
+    //add the button at the end of the navigation toolbar
+    var button = document.getElementById(buttonid);
+
+    if (show)
+    {
+        button.setAttribute("style", "visibility: visible");
+        //toolbar.removeChild(button);
+        //toolbar.insertItem(id, toolbar.lastChild);
+    }
+    else
+    {
+        button.setAttribute("style", "visibility: hidden");
+        //if (button != null)
+        //    toolbar.removeChild(button);
+    }
+}
+
+
+function FG_versionCheck()
+{
+    try {
+        dump("\n\n\n====>Checking Firegoose Version<========\n\n")
+        var currentversion;
+        getVersion("firegoose@systemsbiology.org", function(ver)
+        {
+            currentversion = ver;
+            dump("\n\nFiregoose version: " + currentversion);
+
+            var req = new XMLHttpRequest();
+            req.open("GET", "https://gaggle.systemsbiology.net/firegoose/firegoose_update.rdf", true); // file:/// would work too, BTW
+            req.overrideMimeType("text/plain");
+            req.onload = function() {
+              // Do something with req.responseText
+              //dump("\n" + req.responseText);
+              var versiontextindex1 = req.responseText.indexOf("<em:version>");
+              var versiontext = req.responseText.substring(versiontextindex1 + 12);
+              var versiontextindex2 = versiontext.indexOf("<");
+              //dump(versiontext + "\n");
+              dump("\n" + versiontextindex1 + " " + versiontextindex2 + "\n");
+              if (versiontextindex2 > 0)
+              {
+                  var latestversion = versiontext.substring(0, versiontextindex2);
+                  dump("\n\nFiregoose latest version: " + latestversion);
+                  if (latestversion != currentversion)
+                  {
+                     // We show the update button
+                     //var updateButton = document.getElementById("fg_updateFiregoose");
+                     //updateButton.disabled = false;
+                     //updateButton.setAttribute("visibility", "hidden");
+                     FG_showButton("fg_updateFiregoose", true);
+                  }
+                  else {
+                     FG_showButton("fg_updateFiregoose", false);
+                  }
+              }
+            };
+            req.addEventListener("error", function() {
+              // Handle error
+              dump("\n\nFailed to get Firegoose version file ");
+            }, false);
+            req.send();
+        });
+    }
+    catch (e)
+    {
+        dump("\n\nFailed to check Firegoose version " + e);
+    }
+    FG_versionCheckId = setTimeout('FG_versionCheck()', 7200000);
+}
+
+function FG_updateFiregoose()
+{
+    // Open the firegoose installation page
+    var tabbrowser = getBrowser();
+    var newTab = tabbrowser.addTab("http://gaggle.systemsbiology.net/docs/geese/firegoose/install/");
+    tabbrowser.selectedTab = newTab;
 }
 
 /**

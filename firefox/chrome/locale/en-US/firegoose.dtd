@@ -1,5 +1,5 @@
-<!ENTITY firegoose.version "1.0.1070">
-<!ENTITY firegoose.build.date "2013-11-07 18:10:39">
+<!ENTITY firegoose.version "1.0.1102">
+<!ENTITY firegoose.build.date "2013-11-21 22:13:24">
 
 <!ENTITY firegoose.hello.label "Hello">
 <!ENTITY firegoose.jvm_info.label "JVM Info">
@@ -89,3 +89,7 @@
 <!ENTITY firegoose.sendToWorkflow.label "Capture">
 <!ENTITY firegoose.sendToWorkflow.accesskey "p">
 <!ENTITY firegoose.sendToWorkflow.tooltip "Capture urls on the web page to workflow data space.">
+
+<!ENTITY firegoose.updateFiregoose.label "">
+<!ENTITY firegoose.updateFiregoose.accesskey "u">
+<!ENTITY firegoose.updateFiregoose.tooltip "Update Firegoose to the latest version">

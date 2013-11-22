@@ -147,6 +147,13 @@
            disabled="true"
            />
 
+  <command id="fgcmd_updateFiregoose"
+           label="&firegoose.updateFiregoose.label;"
+           oncommand="FG_updateFiregoose();"
+           tooltiptext="&firegoose.updateFiregoose.tooltip;"
+           disabled="false"
+           />
+
   <!--<command id="fgcmd_executeNextWorkflow"
            label="&firegoose.executeNextWorkflow.label;"
            oncommand="FG_executeNextWorkflow();"
@@ -240,7 +247,7 @@
            hidden="false" persist="hidden"
 		   class="chromeclass-toolbar" context="toolbar-context-menu">
 
-       <hbox align="center">
+       <hbox id="fg_firegooseToolbarhbox" align="center">
     <image id="fg_statusLight" tooltiptext="Not Connected" src="chrome://firegoose/skin/disconnected.png" />
     <toolbarbutton id="fg_registerOrUpdateButton"
     			   image="chrome://firegoose/skin/Gaggle.png"
@@ -295,8 +302,8 @@
       <toolbarbutton id="fg_hideGooseButton" command="fgcmd_hideGoose"/>
       <toolbarbutton id="fg_broadcastButton" command="fgcmd_broadcast"
         align="center" image="chrome://firegoose/skin/broadcast.png"/>
-
-<!-- 
+      <toolbarbutton id="fg_updateFiregoose" image="chrome://firegoose/skin/update.png" command="fgcmd_updateFiregoose" disabled="true"/>
+<!--
       <label value="Target:" control="fg_targetChooser"/>
       <image src="chrome://firegoose/skin/target.png"/>
       <menulist id="fg_targetChooser" disabled="false" width="200"

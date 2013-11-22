@@ -89,3 +89,7 @@
 <!ENTITY firegoose.sendToWorkflow.label "Capture">
 <!ENTITY firegoose.sendToWorkflow.accesskey "p">
 <!ENTITY firegoose.sendToWorkflow.tooltip "Capture urls on the web page to workflow data space.">
+
+<!ENTITY firegoose.updateFiregoose.label "">
+<!ENTITY firegoose.updateFiregoose.accesskey "u">
+<!ENTITY firegoose.updateFiregoose.tooltip "Update Firegoose to the latest version">
