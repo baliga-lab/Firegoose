@@ -77,9 +77,10 @@
     <!--"http://networks.systemsbiology.net/static/lib/DummyApplet.jar" -->
   <html:embed id ="DummyApplet" type="application/x-java-applet;version=1.6"
     code="GaggleFiregooseApplet.class"
-    archive="http://networks.systemsbiology.net/static/lib/GaggleFiregooseApplet.jar, http://networks.systemsbiology.net/static/lib/boss.jar, http://networks.systemsbiology.net/static/lib/gaggle-connector.jar"
+    archive="http://localhost:8000/static/lib/GaggleFiregooseApplet.jar, http://localhost:8000/static/lib/boss.jar, http://localhost:8000/static/lib/gaggle-connector.jar"
     MAYSCRIPT="true" width="0" height="0" />
 </html:div>
+
 
 <commandset id="mainCommandSet">
   <command id="fgcmd_hello" label="&firegoose.hello.label;" oncommand="FG_hello();" tooltiptext="Say hello."/>
@@ -168,6 +169,13 @@
              disabled="false"
             />
 
+  <command id="fgcmd_toggleGaggleSidePanel"
+         label="&firegoose.toggleGaggleSidePanel.label;"
+         oncommand="FG_toggleGaggleSidePanel();"
+         tooltiptext="&firegoose.toggleGaggleSidePanel.tooltip;"
+         disabled="false"
+        />
+
   <!-- 
   <command id="fgcmd_broadcastNames"
            label="&firegoose.broadcastNames.label;"
@@ -241,9 +249,17 @@
        modifiers="alt accel" />
 </keyset>
 
+<window id="main-window">
+<splitter id="fbContentSplitter" collapsed="true" orient="horizontal"
+          insertafter="browser"/>
+<box id="fgContentBox" collapsed="true">
+    <iframe flex="3" id="ifrmWorkspace" width="750" src="http://localhost:8000/workspacecontrol" />
+</box>
+</window>
 
 <toolbox id="navigator-toolbox">
-  <toolbar id="fg_firegooseToolbar" toolbarname="Gaggle Toolbar" accesskey="G"
+
+    <toolbar id="fg_firegooseToolbar" toolbarname="Gaggle Toolbar" accesskey="G"
            hidden="false" persist="hidden"
 		   class="chromeclass-toolbar" context="toolbar-context-menu">
 
@@ -302,7 +318,9 @@
       <toolbarbutton id="fg_hideGooseButton" command="fgcmd_hideGoose"/>
       <toolbarbutton id="fg_broadcastButton" command="fgcmd_broadcast"
         align="center" image="chrome://firegoose/skin/broadcast.png"/>
+      <toolbarbutton id="fg_toggleGaggleSidePanel" command="fgcmd_toggleGaggleSidePanel"/>
       <toolbarbutton id="fg_updateFiregoose" image="chrome://firegoose/skin/update.png" command="fgcmd_updateFiregoose" disabled="true"/>
+
 <!--
       <label value="Target:" control="fg_targetChooser"/>
       <image src="chrome://firegoose/skin/target.png"/>

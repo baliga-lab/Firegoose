@@ -400,6 +400,7 @@ function FG_initialize() {
 	try {
 	    FG_showButton("fg_updateFiregoose", false);
 
+
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"].
 				getService(Components.interfaces.nsIPrefBranch);
 
@@ -677,14 +678,10 @@ function FG_showButton(buttonid, show)
     if (show)
     {
         button.setAttribute("style", "visibility: visible");
-        //toolbar.removeChild(button);
-        //toolbar.insertItem(id, toolbar.lastChild);
     }
     else
     {
         button.setAttribute("style", "visibility: hidden");
-        //if (button != null)
-        //    toolbar.removeChild(button);
     }
 }
 
@@ -1647,6 +1644,8 @@ function FG_pollGoose() {
             FG_previousTargetUpdateSignalValue = value;
             FG_populateTargetChooser();
         }
+
+        PollWorkspaceData();
     }
     setTimeout('FG_pollGoose()', 2000);
 }

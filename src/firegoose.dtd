@@ -93,3 +93,7 @@
 <!ENTITY firegoose.updateFiregoose.label "">
 <!ENTITY firegoose.updateFiregoose.accesskey "u">
 <!ENTITY firegoose.updateFiregoose.tooltip "Update Firegoose to the latest version">
+
+<!ENTITY firegoose.toggleGaggleSidePanel.label "Workspace">
+<!ENTITY firegoose.toggleGaggleSidePanel.accesskey "n">
+<!ENTITY firegoose.toggleGaggleSidePanel.tooltip "Show the Gaggle side panel.">

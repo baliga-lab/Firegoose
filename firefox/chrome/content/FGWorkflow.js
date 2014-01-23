@@ -6,6 +6,33 @@ var FG_collectedData = null;
 var FG_collectedTableData = null;
 var FG_currentTabUrl = null;
 
+function FG_toggleGaggleSidePanel()
+{
+    //alert('show gaggle panel');
+    var container = document.getElementById("browser");
+    var contentBox = document.getElementById("fgContentBox");
+    var show = (contentBox.getAttribute("collapsed") == "true") ? true : false;
+    contentBox.setAttribute("collapsed", !show);
+    //alert(contentBox.getAttribute("width"));
+    if (show)
+    {
+        contentBox.setAttribute("orient", "vertical");
+        container.insertBefore(contentBox, null);
+    }
+
+    var vertical = true;
+    var after = true;
+    //var document = window.parent.document;
+    var splitter = document.getElementById("fbContentSplitter");
+    splitter.setAttribute("collapsed", !show);
+    if (show) {
+        splitter.setAttribute("orient", "horizontal");
+        splitter.setAttribute("dir", ""); //after ? "" : "reverse");
+        container.insertBefore(splitter, contentBox); //after ? null: container.firstChild);
+    }
+
+}
+
 function FG_saveState(goose)
 {
     if (goose != null) {
@@ -133,56 +160,65 @@ function FG_loadState(goose)
 function FG_findOrCreateTabWithUrl(url)
 {
     dump("Tab url: " + FG_currentTabUrl);
-    var tabbrowser = getBrowser();
-    var found = false;
-    var urltab = null;
-    if (tabbrowser != null) {
-        //var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-        //                 .getService(Components.interfaces.nsIWindowMediator);
-        //var browserEnumerator = wm.getEnumerator("navigator:browser");
 
-        // Check each browser instance for our URL
-
-    //while (!found && browserEnumerator.hasMoreElements()) {
-    //    var browserWin = browserEnumerator.getNext();
-    //    var tabbrowser = browserWin.gBrowser;
-
-        // Check each tab of this browser instance
-        var numTabs = tabbrowser.browsers.length;
-        for (var index = 0; index < numTabs; index++) {
-          var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-          if (url == currentBrowser.currentURI.spec) {
-
-            // The URL is already opened. Select this tab.
-            tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
-            urltab = tabbrowser.selectedTab;
-            // Focus *this* browser-window
-            //browserWin.focus();
-
-            found = true;
-            InjectWorkflowData();
-            break;
-          }
-        }
-
-        // Our URL isn't open. Open it now.
-        if (!found) {
-            //var recentWindow = wm.getMostRecentWindow("navigator:browser");
-            //if (recentWindow) {
-              // Use an existing browser window
-            //  recentWindow.delayedOpenTab(url, null, null, null, null);
-            //}
-            //else {
-              // No browser windows are open, so open a new one.
-            //  window.open(url);
-            //}
-
-            var newTab = tabbrowser.addTab(url);
-            tabbrowser.selectedTab = newTab;
-            urltab = newTab;
-        }
+    var workspaceiframe = document.getElementById("ifrmWorkspace");
+    //alert("workflow iframe: " + workspaceiframe);
+    if (workspaceiframe != null)
+    {
+        InjectWorkflowData(workspaceiframe);
     }
-    return urltab;
+    else {
+        var tabbrowser = getBrowser();
+        var found = false;
+        var urltab = null;
+        if (tabbrowser != null) {
+            //var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+            //                 .getService(Components.interfaces.nsIWindowMediator);
+            //var browserEnumerator = wm.getEnumerator("navigator:browser");
+
+            // Check each browser instance for our URL
+
+        //while (!found && browserEnumerator.hasMoreElements()) {
+        //    var browserWin = browserEnumerator.getNext();
+        //    var tabbrowser = browserWin.gBrowser;
+
+            // Check each tab of this browser instance
+            var numTabs = tabbrowser.browsers.length;
+            for (var index = 0; index < numTabs; index++) {
+              var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+              if (url == currentBrowser.currentURI.spec) {
+
+                // The URL is already opened. Select this tab.
+                tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
+                urltab = tabbrowser.selectedTab;
+                // Focus *this* browser-window
+                //browserWin.focus();
+
+                found = true;
+                InjectWorkflowData(null);
+                break;
+              }
+            }
+
+            // Our URL isn't open. Open it now.
+            if (!found) {
+                //var recentWindow = wm.getMostRecentWindow("navigator:browser");
+                //if (recentWindow) {
+                  // Use an existing browser window
+                //  recentWindow.delayedOpenTab(url, null, null, null, null);
+                //}
+                //else {
+                  // No browser windows are open, so open a new one.
+                //  window.open(url);
+                //}
+
+                var newTab = tabbrowser.addTab(url);
+                tabbrowser.selectedTab = newTab;
+                urltab = newTab;
+            }
+        }
+        return urltab;
+    }
 }
 
 function InsertData(url, targettable)
@@ -300,12 +336,39 @@ function InsertData(url, targettable)
     }
 }
 
-
-function InjectWorkflowData()
+function PollWorkspaceData()
 {
+    var workspaceiframe = document.getElementById("ifrmWorkspace");
+    if (workspaceiframe != null) {
+        doc = workspaceiframe.contentDocument;
+        var inputfromWorkspace = doc.getElementById("inputFiregoose");
+        //dump("Input from workspace " + inputfromWorkspace);
+        if (inputfromWorkspace != null)
+        {
+            var link = inputfromWorkspace.value;
+            //dump("Firegoose got data from Workspace: " + link);
+            if (link != null && link.length > 0 && link.indexOf("http://") == 0)
+            {
+                dump("\n\nFiregoose got data from Workspace: " + link);
+                getBrowser().addTab(link);
+            }
+            inputfromWorkspace.value = "";
+        }
+    }
+
+}
+
+
+function InjectWorkflowData(workflowiframe)
+{
+    var doc = gBrowser.contentDocument;
+    if (workflowiframe != null) {
+        doc = workflowiframe.contentDocument;
+        //alert("iframe document object: " + doc);
+    }
     dump("\nInjecting data to workflow space...\n");
     dump("Data tab url: " + FG_currentTabUrl);
-    var doc = gBrowser.contentDocument;
+
     var dataspacediv = doc.getElementById(FG_workflowDataspaceID);
     dump("\ndataspace div: " + dataspacediv);
     if (dataspacediv != null) {

@@ -11,7 +11,7 @@
     <em:unpack>true</em:unpack>
 
     <em:name>FireGoose</em:name>
-    <em:version>1.0.1102</em:version>
+    <em:version>1.0.1173</em:version>
     <em:type>2</em:type>
     <em:description>Connect FireFox to the Gaggle</em:description>
     <em:creator>J. Christopher Bare, Institute for Systems Biology</em:creator>
